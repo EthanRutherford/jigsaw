@@ -1,6 +1,18 @@
 /* global importScripts workbox */
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.1/workbox-sw.js");
 
+workbox.setConfig({
+	debug: true,
+});
+
+// cache cors-anywhere responses
+workbox.routing.registerRoute(
+	(request) => request.url.host === "cors-anywhere.herokuapp.com",
+	workbox.strategies.cacheFirst({
+		cacheName: "cors-anywhere-images",
+	}),
+);
+
 // cache the Google Fonts stylesheets
 workbox.routing.registerRoute(
 	/^https:\/\/fonts\.googleapis\.com/,
@@ -41,7 +53,7 @@ self.addEventListener("install", (event) => {
 	const urls = [
 		"/",
 		"/dist/main.js",
-		"/dist/styles.css",
+		// "/dist/styles.css",
 	];
 
 	event.waitUntil(caches.open("jigsaw-application-code").then(

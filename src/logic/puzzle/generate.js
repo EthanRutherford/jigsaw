@@ -1,4 +1,4 @@
-import {randFloat, randChance} from "./random";
+import {randFloat, randChance} from "../random";
 
 function makeEdge(prevControl) {
 	// an edge of a puzzle piece is defined by 4 consecutive bezier curves

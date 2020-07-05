@@ -7,7 +7,7 @@ module.exports = ${componentName}`;
 }
 
 module.exports = (env) => ({
-	entry: "./src/main.js",
+	entry: "./src/main.jsx",
 	output: {filename: "main.js"},
 	plugins: [new MiniCssExtractPlugin({filename: "styles.css"})],
 	module: {
@@ -33,7 +33,7 @@ module.exports = (env) => ({
 			use: "babel-loader",
 		}],
 	},
-	resolve: {extensions: [".js", ".json", ".css", ".svg"]},
+	resolve: {extensions: [".js", ".jsx", ".json", ".css", ".svg"]},
 	mode: env === "prod" ? "production" : "development",
 	devtool: env === "prod" ? "" : "eval-source-map",
 	devServer: {open: true, publicPath: "/dist", port: 8084},
