@@ -267,9 +267,9 @@ export class BVH {
 		this.pieceToNode = {};
 	}
 	insert(piece) {
-		// make the aabb a bit bigger to contain the nubs
-		const hw = piece.w * 1.5 / 2;
-		const hh = piece.h * 1.5 / 2;
+		// make the aabb a bit bigger to account for the nubs
+		const hw = piece.w * 1.2 / 2;
+		const hh = piece.h * 1.2 / 2;
 		const aabb = new AABB(piece.x - hw, piece.y - hh, piece.x + hw, piece.y + hh);
 
 		const node = this.tree.insert(aabb);

@@ -33,32 +33,100 @@ function useGame(image, columns, rows) {
 			}
 		}, {passive: false});
 
-		function mouseDragPiece(piece, pos) {
+		function mouseDragGroup(rootPiece, pos) {
 			const {camera, renderer, bvh} = game.current;
+			const mouseDownStamp = Date.now();
+			let moved = false;
 
-			// lift the piece
-			const offset = {x: piece.x - pos.x, y: piece.y - pos.y};
-			piece.zIndex = 999;
+			// lift the group of pieces
+			const pieceDefs = [];
+			for (const piece of rootPiece.group.pieces) {
+				pieceDefs.push({
+					piece,
+					offset: {x: piece.x - pos.x, y: piece.y - pos.y},
+				});
+				piece.zIndex = 999;
+			}
 
+			// handle dragging the group
 			function mouseMove(event) {
 				event.preventDefault();
 
-				// move the piece
+				// move the pieces
 				const offx = event.offsetX, offy = event.offsetY;
 				const pos = renderer.viewportToWorld(offx, offy, camera);
-				piece.x = pos.x + offset.x;
-				piece.y = pos.y + offset.y;
+				for (const def of pieceDefs) {
+					def.piece.x = pos.x + def.offset.x;
+					def.piece.y = pos.y + def.offset.y;
+				}
+
+				moved = true;
 			}
 
-			function mouseUp() {
+			// handle end of drag
+			function mouseUp(event) {
 				event.preventDefault();
 
-				// place piece down
-				bvh.remove(piece);
-				const hits = bvh.insert(piece);
-				piece.zIndex = Math.max(0, ...hits.map((h) => h.zIndex)) + 1;
+				// apply rotation if this was a tap
+				if (Date.now() - mouseDownStamp < 200 || !moved) {
+					const diff = event.shiftKey ? 1 : -1;
+					let newOrientation = (rootPiece.orientation + diff) % 4;
+					if (newOrientation === -1) newOrientation = 3;
 
-				// TODO: check for connections
+					// reorient pieces in group
+					const offx = event.offsetX, offy = event.offsetY;
+					const pos = renderer.viewportToWorld(offx, offy, camera);
+					for (const def of pieceDefs) {
+						def.piece.orientation = newOrientation;
+
+						const newOff = event.shiftKey ? {
+							x: -def.offset.y, y: def.offset.x,
+						} : {
+							x: def.offset.y, y: -def.offset.x,
+						};
+
+						def.piece.x = pos.x + newOff.x;
+						def.piece.y = pos.y + newOff.y;
+					}
+				}
+
+				// place pieces down
+				for (const def of pieceDefs) {
+					bvh.remove(def.piece);
+					const hits = bvh.insert(def.piece);
+
+					// check for connections
+					const filtered = hits.filter((p) => !def.piece.group.pieces.has(p));
+					for (const other of filtered) {
+						// early exit if pieces aren't aligned neighbors
+						if (
+							def.piece.orientation !== other.orientation ||
+							!def.piece.isNeighbor(other)
+						) {
+							continue;
+						}
+
+						// check if within snapping distance
+						const correctPos = def.piece.getConnectedPosition(other);
+						const error = {x: correctPos.x - other.x, y: correctPos.y - other.y};
+						if (error.x ** 2 + error.y ** 2 > .04) {
+							continue;
+						}
+
+						def.piece.group.join(other.group);
+					}
+
+					def.piece.zIndex = Math.max(0, ...filtered.map((h) => h.zIndex)) + 1;
+				}
+
+				// snap pieces in group to correct positions
+				rootPiece.group.correctPositions(rootPiece);
+
+				// pieces may have been nudged, adjust thier bvh nodes
+				for (const piece of rootPiece.group.pieces) {
+					bvh.remove(piece);
+					bvh.insert(piece);
+				}
 
 				canvas.current.removeEventListener("mousemove", mouseMove);
 				canvas.current.removeEventListener("mouseup", mouseUp);
@@ -116,7 +184,7 @@ function useGame(image, columns, rows) {
 					return Math.abs(distDiff < .04) ? b.piece.zIndex - a.piece.zIndex : distDiff;
 				})[0].piece;
 
-				mouseDragPiece(piece, pos);
+				mouseDragGroup(piece, pos);
 			} else {
 				mouseDragCamera(pos);
 			}
