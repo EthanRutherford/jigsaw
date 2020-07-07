@@ -1,7 +1,8 @@
-import React, {useRef, useEffect} from "react";
+import React, {useRef, useEffect, useState} from "react";
 import {AABB} from "../logic/framework/bvh";
 import {Puzzle} from "../logic/puzzle/puzzle";
 import {PuzzleGame} from "../logic/game";
+import styles from "../styles/game.css";
 
 function useGame(image, columns, rows) {
 	const canvas = useRef();
@@ -219,11 +220,21 @@ function useGame(image, columns, rows) {
 
 export function Game({image, columns, rows}) {
 	const canvas = useGame(image, columns, rows);
+	const [isPreviewing, setIsPreviewing] = useState();
 
 	return (
-		<canvas
-			style={{width: "1600px", height: "800px"}}
-			ref={canvas}
-		/>
+		<div className={styles.container}>
+			<canvas
+				className={styles.viewport}
+				ref={canvas}
+			/>
+			<div className={styles.previewContainer}>
+				<img
+					className={`${styles.preview} ${isPreviewing ? styles.openPreview : ""}`}
+					src={image.src}
+					onClick={() => setIsPreviewing((i) => !i)}
+				/>
+			</div>
+		</div>
 	);
 }

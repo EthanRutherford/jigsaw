@@ -2,6 +2,7 @@ import {render} from "react-dom";
 import React, {useEffect, useState} from "react";
 import {Puzzle} from "./logic/puzzle/puzzle";
 import {Game} from "./ui/game";
+import "./styles/root.css";
 
 // register service worker
 if ("serviceWorker" in navigator) {
@@ -22,13 +23,7 @@ function App() {
 		return null;
 	}
 
-	return (
-		<>
-			<Game image={image} columns={20} rows={10} />
-			{/* print source image */}
-			<img src={image.src} />
-		</>
-	);
+	return <Game image={image} columns={20} rows={10} />;
 }
 
 render(<App />, document.getElementById("react-root"));
