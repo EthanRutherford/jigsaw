@@ -89,4 +89,17 @@ export class Piece {
 			y: this.y + offset.y,
 		};
 	}
+	moveTo(x, y) {
+		this.x = x;
+		this.y = y;
+		this.group.correctPositions(this);
+	}
+	rotate(orientation) {
+		// reorient pieces in group
+		for (const piece of this.group.pieces) {
+			piece.orientation = orientation;
+		}
+
+		this.group.correctPositions(this);
+	}
 }

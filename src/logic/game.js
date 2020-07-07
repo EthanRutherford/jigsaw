@@ -52,6 +52,87 @@ export class PuzzleGame {
 		this.render = this.render.bind(this);
 		this.render();
 	}
+	viewportToWorld(x, y) {
+		return this.renderer.viewportToWorld(x, y, this.camera);
+	}
+	placePieces(rootPiece) {
+		const {bvh} = this;
+
+		let snapToPiece = rootPiece;
+		for (const piece of rootPiece.group.pieces) {
+			bvh.remove(piece);
+			const hits = bvh.insert(piece);
+
+			// check for connections
+			const filtered = hits.filter((p) => !piece.group.pieces.has(p));
+			for (const other of filtered) {
+				// early exit if pieces aren't aligned neighbors
+				if (
+					piece.orientation !== other.orientation ||
+					!piece.isNeighbor(other)
+				) {
+					continue;
+				}
+
+				// check if within snapping distance
+				const correctPos = piece.getConnectedPosition(other);
+				const error = {x: correctPos.x - other.x, y: correctPos.y - other.y};
+				if (error.x ** 2 + error.y ** 2 > .04) {
+					continue;
+				}
+
+				// success! snap to the larger group
+				if (snapToPiece.group.size < other.group.size) {
+					snapToPiece = other;
+				}
+
+				piece.group.join(other.group);
+			}
+		}
+
+		// snap pieces in group to correct positions
+		rootPiece.group.correctPositions(snapToPiece);
+
+		// correct bvh nodes and zIndex values
+		let zIndex = 0;
+		for (const piece of rootPiece.group.pieces) {
+			bvh.remove(piece);
+			const hits = bvh.insert(piece);
+			for (const hit of hits) {
+				if (!piece.group.pieces.has(hit) && hit.zIndex > zIndex) {
+					zIndex = hit.zIndex;
+				}
+			}
+		}
+
+		for (const piece of rootPiece.group.pieces) {
+			piece.zIndex = zIndex + 1;
+		}
+	}
+	query(pos) {
+		const {camera, bvh} = this;
+
+		const hitArea = new AABB(
+			pos.x - camera.zoom / 200,
+			pos.y - camera.zoom / 200,
+			pos.x + camera.zoom / 200,
+			pos.y + camera.zoom / 200,
+		);
+
+		const hits = bvh.query(hitArea).map((p) => ({
+			piece: p,
+			dist: (p.x - pos.x) ** 2 + (p.y - pos.y) ** 2,
+		}));
+
+		if (hits.length === 0) {
+			return null;
+		}
+
+		return hits.sort((a, b) => {
+			const distDiff = a.dist - b.dist;
+			return Math.abs(distDiff < .04) ? b.piece.zIndex - a.piece.zIndex : distDiff;
+		})[0].piece;
+	}
 	render() {
 		this.renderer.render(this.camera, this.scene);
 		requestAnimationFrame(this.render);
