@@ -53,7 +53,7 @@ self.addEventListener("install", (event) => {
 	const urls = [
 		"/",
 		"/dist/main.js",
-		// "/dist/styles.css",
+		"/dist/styles.css",
 	];
 
 	event.waitUntil(caches.open("jigsaw-application-code").then(
