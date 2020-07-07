@@ -31,8 +31,8 @@ export function mouseZoomPan(game, event) {
 		game.camera.y += oldPos.y - newPos.y;
 	} else {
 		// pan
-		game.current.camera.x -= dx * game.camera.zoom / 1000;
-		game.current.camera.y += dy * game.camera.zoom / 1000;
+		game.camera.x -= dx * game.camera.zoom / 1000;
+		game.camera.y += dy * game.camera.zoom / 1000;
 	}
 }
 
