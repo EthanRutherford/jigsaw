@@ -1,5 +1,6 @@
 import {render} from "react-dom";
 import React, {useEffect, useState} from "react";
+import {Puzzle} from "./logic/puzzle/puzzle";
 import {Game} from "./ui/game";
 
 // register service worker
@@ -21,27 +22,13 @@ function App() {
 		return null;
 	}
 
-	return <Game image={image} columns={20} rows={10} />;
+	return (
+		<>
+			<Game image={image} columns={20} rows={10} />
+			{/* print source image */}
+			<img src={image.src} />
+		</>
+	);
 }
 
 render(<App />, document.getElementById("react-root"));
-
-
-
-
-// debugging, print the whole puzzle
-import {Puzzle} from "./logic/puzzle/puzzle";
-
-async function main() {
-	const image = await Puzzle.fetchImage("https://cdn.mos.cms.futurecdn.net/jbCNvTM4gwr2qV8X8fW3ZB.png");
-	const puzzle = new Puzzle(image, 20, 10);
-
-	document.body.append(puzzle.drawFullPuzzle());
-	for (let i = 0; i < puzzle.c; i++) {
-		for (let j = 0; j < puzzle.r; j++) {
-			document.body.append(puzzle.drawPiece(i, j));
-		}
-	}
-}
-
-main();
