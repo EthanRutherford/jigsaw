@@ -1,7 +1,8 @@
 import React, {useRef, useEffect, useState} from "react";
 import {Puzzle} from "../logic/puzzle/puzzle";
 import {PuzzleGame} from "../logic/game";
-import {mouseZoomPan, mouseDragGroup, mouseDragCamera} from "./controls/mouse";
+import {mouseZoomPan} from "./controls/mouse";
+import {setupPointerControls} from "./controls/pointer";
 import styles from "../styles/game.css";
 
 function useGame(image, columns, rows) {
@@ -15,17 +16,7 @@ function useGame(image, columns, rows) {
 			mouseZoomPan(game, event);
 		}, {passive: false});
 
-		canvas.current.addEventListener("mousedown", (event) => {
-			event.preventDefault();
-			const pos = game.viewportToWorld(event.offsetX, event.offsetY);
-			const hit = game.query(pos);
-
-			if (hit != null) {
-				mouseDragGroup(game, canvas.current, hit, pos);
-			} else {
-				mouseDragCamera(game, canvas.current, pos);
-			}
-		});
+		setupPointerControls(game, canvas.current);
 	}, []);
 
 	return canvas;
