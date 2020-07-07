@@ -11,7 +11,7 @@
     "start": "start webpack-dev-server"
   },
   "dependencies": {
-    "2d-gl": "^1.7.3",
+    "2d-gl": "^1.7.4",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
   },

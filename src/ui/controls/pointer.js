@@ -56,7 +56,6 @@ export function setupPointerControls(game, canvas) {
 		event.preventDefault();
 
 		if (pState === pStates.none) {
-			event.preventDefault();
 			const pos = game.viewportToWorld(event.offsetX, event.offsetY);
 			const hit = game.query(pos);
 

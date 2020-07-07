@@ -32,13 +32,11 @@ export function Game({image, columns, rows}) {
 				className={styles.viewport}
 				ref={canvas}
 			/>
-			<div className={styles.previewContainer}>
-				<img
-					className={`${styles.preview} ${isPreviewing ? styles.openPreview : ""}`}
-					src={image.src}
-					onClick={() => setIsPreviewing((i) => !i)}
-				/>
-			</div>
+			<img
+				className={`${styles.preview} ${isPreviewing ? styles.openPreview : ""}`}
+				src={image.src}
+				onClick={() => setIsPreviewing((i) => !i)}
+			/>
 		</div>
 	);
 }
