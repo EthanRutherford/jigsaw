@@ -14,9 +14,7 @@ class Group {
 	}
 	join(other) {
 		// the bigger group should eat the smaller group
-		const [subsumer, subsumed] =
-			this.pieces.size > other.pieces.size ? [this, other] : [other, this]
-		;
+		const [subsumer, subsumed] = this.size > other.size ? [this, other] : [other, this];
 
 		for (const piece of subsumed.pieces) {
 			subsumer.pieces.add(piece);
@@ -31,6 +29,9 @@ class Group {
 			piece.x = correctPos.x;
 			piece.y = correctPos.y;
 		}
+	}
+	get size() {
+		return this.pieces.size;
 	}
 }
 

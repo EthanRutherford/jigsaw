@@ -14,28 +14,46 @@ function useGame(image, columns, rows) {
 			event.preventDefault();
 			const {camera, renderer} = game.current;
 
+			// attempt to normalize wheel event data; some bits borrowed from
+			// https://gist.github.com/akella/11574989a9f3cc9e0ad47e401c12ccaf
+
+			let dx = event.wheelDeltaX;
+			let dy = event.wheelDeltaY;
+
+			// if the above are null, we're probably in firefox: fallback to deltas
+			if (dx == null || dy == null) {
+				dx = -event.deltaX * 50;
+				dy = -event.deltaY * 50;
+			}
+
+			// the shift key turns vertical scrolling into horizontal.
+			// also, some trackpads (unfortunately) use this to do side scrolling
+			if (event.shiftKey) {
+				dx = dy;
+				dy = 0;
+			}
+
 			if (event.ctrlKey) {
 				// zoom
 				const offx = event.offsetX, offy = event.offsetY;
 				const oldPos = renderer.viewportToWorld(offx, offy, camera);
-				camera.zoom = Math.max(1, Math.min(50, camera.zoom + event.deltaY / 100));
+				camera.zoom = Math.max(1, Math.min(50, camera.zoom - dy / 100));
 
 				// center zoom on mouse position
 				const newPos = renderer.viewportToWorld(offx, offy, camera);
 				camera.x += oldPos.x - newPos.x;
 				camera.y += oldPos.y - newPos.y;
-			} else if (event.shiftKey) {
-				// horizontal scrolling
-				game.current.camera.x += event.deltaY * camera.zoom / 1000;
 			} else {
-				// vertical scrolling
-				game.current.camera.y -= event.deltaY * camera.zoom / 1000;
+				// pan
+				game.current.camera.x -= dx * camera.zoom / 1000;
+				game.current.camera.y += dy * camera.zoom / 1000;
 			}
 		}, {passive: false});
 
 		function mouseDragGroup(rootPiece, pos) {
 			const {camera, renderer, bvh} = game.current;
 			const mouseDownStamp = Date.now();
+			let snapToPiece = rootPiece;
 			let moved = false;
 
 			// lift the group of pieces
@@ -113,6 +131,11 @@ function useGame(image, columns, rows) {
 							continue;
 						}
 
+						// success! snap to the larger group
+						if (snapToPiece.group.size < other.group.size) {
+							snapToPiece = other;
+						}
+
 						def.piece.group.join(other.group);
 					}
 
@@ -120,7 +143,7 @@ function useGame(image, columns, rows) {
 				}
 
 				// snap pieces in group to correct positions
-				rootPiece.group.correctPositions(rootPiece);
+				rootPiece.group.correctPositions(snapToPiece);
 
 				// pieces may have been nudged, adjust thier bvh nodes
 				for (const piece of rootPiece.group.pieces) {
