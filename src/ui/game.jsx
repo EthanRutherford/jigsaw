@@ -37,7 +37,7 @@ function useGame(image, columns, rows) {
 				// zoom
 				const offx = event.offsetX, offy = event.offsetY;
 				const oldPos = renderer.viewportToWorld(offx, offy, camera);
-				camera.zoom = Math.max(1, Math.min(50, camera.zoom - dy / 100));
+				camera.zoom = Math.max(2, Math.min(50, camera.zoom - dy / 100));
 
 				// center zoom on mouse position
 				const newPos = renderer.viewportToWorld(offx, offy, camera);
