@@ -1,7 +1,7 @@
 import {Renderer, Scene, rgba, builtIn} from "2d-gl";
 import {AABB, BVH} from "./framework/bvh";
 import {Piece} from "./framework/piece";
-import {randFloat, randInt} from "./random";
+import {randFloat, randInt, randChance} from "./random";
 const {OrthoCamera} = builtIn;
 
 export class PuzzleGame {
@@ -23,8 +23,20 @@ export class PuzzleGame {
 				const image = puzzle.drawPiece(i, j);
 
 				const piece = new Piece(id, i, j, this.renderer, image, puzzle.w, puzzle.h);
-				piece.x = randFloat(-10, 10);
-				piece.y = randFloat(-10, 10);
+
+				// place pieces in random positions around a puzzle-sized hole
+				const w = puzzle.c;
+				const hw = w / 2;
+				const h = puzzle.r;
+				const hh = h / 2;
+				if (randChance(.5)) {
+					piece.x = randFloat(-w, w);
+					piece.y = (randChance(.5) ? 1 : -1) * randFloat(hh, h);
+				} else {
+					piece.x = (randChance(.5) ? 1 : -1) * randFloat(hw, w);
+					piece.y = randFloat(-h, h);
+				}
+
 				piece.orientation = randInt(0, 3);
 
 				this.pieces.push(piece);

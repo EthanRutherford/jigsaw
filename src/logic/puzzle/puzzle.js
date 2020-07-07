@@ -79,7 +79,13 @@ export class Puzzle {
 		return canvas;
 	}
 	drawPiece(x, y) {
-		const {image, c, r, w, h, horizontal, vertical} = this;
+		const {image, c, r, horizontal, vertical} = this;
+
+		// choose scale such that drawn images are at least 200px wide
+		// this is primarily to ensure the piece borders are fairly smooth
+		const scale = Math.ceil(200 / this.w);
+		const w = this.w * scale;
+		const h = this.h * scale;
 
 		const canvas = document.createElement("canvas");
 		canvas.width = w * 2;
@@ -128,7 +134,8 @@ export class Puzzle {
 
 		context.fill();
 		context.globalCompositeOperation = "source-in";
-		context.drawImage(image, left - (x * w), top - (y * h));
+		context.imageSmoothingEnabled = false;
+		context.drawImage(image, left - (x * w), top - (y * h), image.width * scale, image.height * scale);
 
 		return canvas;
 	}

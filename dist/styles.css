@@ -1,0 +1,35 @@
+.game__container--28rCx {
+	position: relative;
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+}
+
+.game__viewport--1a_I5 {
+	width: 100%;
+	height: 100%;
+}
+
+.game__preview--1TRUP {
+	box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, .2);
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 8vw;
+	max-height: 100vh;
+	transition: width .2s;
+	object-fit: contain;
+}
+.game__preview--1TRUP:hover {
+	width: 10vw;
+}
+.game__preview--1TRUP.game__open-preview--2Q5fA {
+	width: 100vw;
+}
+
+html, body {
+	height: 100%;
+	width: 100%;
+	margin: 0;
+}
+
