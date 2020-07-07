@@ -9,7 +9,7 @@ export class PuzzleGame {
 		this.bvh = new BVH();
 
 		this.renderer = new Renderer(canvas);
-		this.scene = new Scene({bgColor: rgba(.1, .1, .1, 1)});
+		this.scene = new Scene({bgColor: rgba(.15, .15, .15, 1)});
 		this.camera = new OrthoCamera(0, 0, 20);
 		this.scene.getVisibleFunc = (x0, y0, x1, y1) => {
 			return this.bvh.query(new AABB(x0, y0, x1, y1)).map((p) => p.renderable);
