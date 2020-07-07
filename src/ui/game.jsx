@@ -36,6 +36,7 @@ function useGame(image, columns, rows) {
 		function mouseDragGroup(rootPiece, pos) {
 			const {camera, renderer, bvh} = game.current;
 			const mouseDownStamp = Date.now();
+			let snapToPiece = rootPiece;
 			let moved = false;
 
 			// lift the group of pieces
@@ -113,6 +114,11 @@ function useGame(image, columns, rows) {
 							continue;
 						}
 
+						// success! snap to the larger group
+						if (snapToPiece.group.size < other.group.size) {
+							snapToPiece = other;
+						}
+
 						def.piece.group.join(other.group);
 					}
 
@@ -120,7 +126,7 @@ function useGame(image, columns, rows) {
 				}
 
 				// snap pieces in group to correct positions
-				rootPiece.group.correctPositions(rootPiece);
+				rootPiece.group.correctPositions(snapToPiece);
 
 				// pieces may have been nudged, adjust thier bvh nodes
 				for (const piece of rootPiece.group.pieces) {
