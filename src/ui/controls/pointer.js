@@ -133,8 +133,8 @@ export function setupPointerControls(game, canvas) {
 				if (pList.length === 0) {
 					pState = pStates.none;
 				} else {
-					// re-pin remaining touch point to current position
-					pList[0].pos = game.viewportToWorld(event.offsetX, event.offsetY);
+					// re-pin remaining touch point to its current position
+					pList[0].pos = game.viewportToWorld(pList[0].offsetX, pList[0].offsetY);
 				}
 			}
 		}
