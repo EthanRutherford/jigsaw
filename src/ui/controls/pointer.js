@@ -65,8 +65,9 @@ export function setupPointerControls(game, canvas) {
 			} else {
 				pState = pStates.camera;
 				pData = {pos};
-				pList.push(event);
 			}
+
+			pList.push(event);
 		} else if (pState === pStates.camera && pList.length === 1) {
 			pList.push(event);
 		}
@@ -75,7 +76,7 @@ export function setupPointerControls(game, canvas) {
 	canvas.addEventListener("pointermove", (event) => {
 		event.preventDefault();
 
-		if (pState === pStates.piece) {
+		if (pState === pStates.piece && event.pointerId === pList[0].pointerId) {
 			dragGroup(game, event, pData);
 		} else if (pState === pStates.camera) {
 			const index = pList.findIndex((p) => p.pointerId === event.pointerId);
@@ -91,6 +92,7 @@ export function setupPointerControls(game, canvas) {
 
 		if (pState === pStates.piece) {
 			dropGroup(game, event, pData);
+			pList.pop();
 			pState = pStates.none;
 		} else if (pState === pStates.camera) {
 			const index = pList.findIndex((p) => p.pointerId === event.pointerId);
