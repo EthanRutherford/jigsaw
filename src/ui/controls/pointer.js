@@ -4,7 +4,7 @@ const pStates = {
 	camera: 2,
 };
 
-function initDragGroup(hit, pos) {
+function initDragPointer(hit, pos) {
 	for (const piece of hit.group.pieces) {
 		piece.zIndex = 999;
 	}
@@ -17,39 +17,58 @@ function initDragGroup(hit, pos) {
 	};
 }
 
-function dragGroup(game, pointer, pData) {
-	const pos = game.viewportToWorld(pointer.offsetX, pointer.offsetY);
-	pData.root.moveTo(pos.x + pData.offset.x, pos.y + pData.offset.y);
-	pData.moved = true;
+function updatePointer(pointer, event) {
+	pointer.pointerId = event.pointerId;
+	pointer.offsetX = event.offsetX;
+	pointer.offsetY = event.offsetY;
+	pointer.shiftKey = event.shiftKey;
+	return pointer;
 }
 
-function dropGroup(game, pointer, pData) {
+function dragGroup(game, pointer) {
+	const pos = game.viewportToWorld(pointer.offsetX, pointer.offsetY);
+	pointer.root.moveTo(pos.x + pointer.offset.x, pos.y + pointer.offset.y);
+	pointer.moved = true;
+}
+
+function dropGroup(game, pointer) {
 	// apply rotation if this was a tap
-	if (Date.now() - pData.start < 100 || !pData.moved) {
+	if (Date.now() - pointer.start < 100 || !pointer.moved) {
 		const diff = pointer.shiftKey ? 1 : -1;
-		let newOrientation = (pData.root.orientation + diff) % 4;
+		let newOrientation = (pointer.root.orientation + diff) % 4;
 		if (newOrientation === -1) newOrientation = 3;
 
-		pData.root.rotate(newOrientation);
+		pointer.root.rotate(newOrientation);
 	}
 
 	// place pieces down
-	game.placePieces(pData.root);
+	game.placePieces(pointer.root);
 }
 
-function dragCamera(game, [p1, p2], pData) {
+function dragCamera(game, [p1, p2]) {
 	if (p2 == null) {
 		const curPos = game.viewportToWorld(p1.offsetX, p1.offsetY);
-		game.camera.x += pData.pos.x - curPos.x;
-		game.camera.y += pData.pos.y - curPos.y;
+		game.camera.x += p1.pos.x - curPos.x;
+		game.camera.y += p1.pos.y - curPos.y;
 	} else {
-		// TODO: handle pinch-zoom
+		const curPos1 = game.viewportToWorld(p1.offsetX, p1.offsetY);
+		const curPos2 = game.viewportToWorld(p2.offsetX, p2.offsetY);
+
+		const correctDist = Math.sqrt((p1.pos.x - p2.pos.x) ** 2 + (p1.pos.y - p2.pos.y) ** 2);
+		const actualDist = Math.sqrt((curPos1.x - curPos2.x) ** 2 + (curPos1.y - curPos2.y) ** 2);
+
+		const ratio = correctDist / actualDist;
+		game.camera.zoom = Math.max(2, Math.min(50, game.camera.zoom * ratio));
+
+		// maintain world position of p1
+		const newPos = game.viewportToWorld(p1.offsetX, p1.offsetY);
+		game.camera.x += p1.pos.x - newPos.x;
+		game.camera.y += p1.pos.y - newPos.y;
 	}
 }
 
 export function setupPointerControls(game, canvas) {
 	let pState = pStates.none;
-	let pData = null;
 	const pList = [];
 
 	canvas.addEventListener("pointerdown", (event) => {
@@ -61,15 +80,14 @@ export function setupPointerControls(game, canvas) {
 
 			if (hit != null) {
 				pState = pStates.piece;
-				pData = initDragGroup(hit, pos);
+				pList.push(updatePointer(initDragPointer(hit, pos), event));
 			} else {
 				pState = pStates.camera;
-				pData = {pos};
+				pList.push(updatePointer({pos}, event));
 			}
-
-			pList.push(event);
 		} else if (pState === pStates.camera && pList.length === 1) {
-			pList.push(event);
+			const pos = game.viewportToWorld(event.offsetX, event.offsetY);
+			pList.push(updatePointer({pos}, event));
 		}
 	});
 
@@ -77,12 +95,13 @@ export function setupPointerControls(game, canvas) {
 		event.preventDefault();
 
 		if (pState === pStates.piece && event.pointerId === pList[0].pointerId) {
-			dragGroup(game, event, pData);
+			updatePointer(pList[0], event);
+			dragGroup(game, pList[0]);
 		} else if (pState === pStates.camera) {
 			const index = pList.findIndex((p) => p.pointerId === event.pointerId);
 			if (index !== -1) {
-				pList[index] = event;
-				dragCamera(game, pList, pData);
+				updatePointer(pList[index], event);
+				dragCamera(game, pList);
 			}
 		}
 	});
@@ -90,8 +109,9 @@ export function setupPointerControls(game, canvas) {
 	function handlePointerUp(event) {
 		event.preventDefault();
 
-		if (pState === pStates.piece) {
-			dropGroup(game, event, pData);
+		if (pState === pStates.piece && event.pointerId === pList[0].pointerId) {
+			updatePointer(pList[0], event);
+			dropGroup(game, pList[0]);
 			pList.pop();
 			pState = pStates.none;
 		} else if (pState === pStates.camera) {
