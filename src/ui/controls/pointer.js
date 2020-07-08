@@ -60,10 +60,22 @@ function dragCamera(game, [p1, p2]) {
 		const ratio = correctDist / actualDist;
 		game.camera.zoom = Math.max(2, Math.min(50, game.camera.zoom * ratio));
 
-		// maintain world position of p1
-		const newPos = game.viewportToWorld(p1.offsetX, p1.offsetY);
-		game.camera.x += p1.pos.x - newPos.x;
-		game.camera.y += p1.pos.y - newPos.y;
+		// maintain world position of centroid
+		const newPos1 = game.viewportToWorld(p1.offsetX, p1.offsetY);
+		const newPos2 = game.viewportToWorld(p2.offsetX, p2.offsetY);
+
+		const curCenter = {
+			x: (curPos1.x + curPos2.x) / 2,
+			y: (curPos1.y + curPos2.y) / 2,
+		};
+
+		const newCenter = {
+			x: (newPos1.x + newPos2.x) / 2,
+			y: (newPos1.y + newPos2.y) / 2,
+		};
+
+		game.camera.x += curCenter.x - newCenter.x;
+		game.camera.y += curCenter.y - newCenter.y;
 	}
 }
 
@@ -120,6 +132,9 @@ export function setupPointerControls(game, canvas) {
 				pList.splice(index, 1);
 				if (pList.length === 0) {
 					pState = pStates.none;
+				} else {
+					// re-pin remaining touch point to its current position
+					pList[0].pos = game.viewportToWorld(pList[0].offsetX, pList[0].offsetY);
 				}
 			}
 		}
