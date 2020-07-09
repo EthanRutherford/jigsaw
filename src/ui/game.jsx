@@ -9,7 +9,7 @@ function useGame(image, columns, rows) {
 	const canvas = useRef();
 	useEffect(() => {
 		const puzzle = new Puzzle(image, columns, rows);
-		const game = new PuzzleGame(puzzle, canvas.current);
+		const game = new PuzzleGame(puzzle, [], canvas.current);
 
 		canvas.current.addEventListener("wheel", (event) => {
 			event.preventDefault();

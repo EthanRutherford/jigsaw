@@ -10,6 +10,7 @@ const quickRotate = {
 
 class Group {
 	constructor(parent) {
+		this.id = parent.id;
 		this.pieces = new Set([parent]);
 	}
 	join(other) {
