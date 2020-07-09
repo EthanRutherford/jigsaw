@@ -150,5 +150,26 @@ export class Puzzle {
 			image.onerror = reject;
 		});
 	}
+	static toSaveFormat(puzzle) {
+		return {
+			c: puzzle.c,
+			r: puzzle.r,
+			horizontal: puzzle.horizontal,
+			vertical: puzzle.vertical,
+		};
+	}
+	static fromSaveFormat(image, save) {
+		const puzzle = Object.create(Puzzle.prototype);
+		puzzle.image = image;
+		puzzle.width = image.width;
+		puzzle.height = image. height;
+		puzzle.c = save.c;
+		puzzle.r = save.r;
+		puzzle.w = image.width / puzzle.c;
+		puzzle.h = image.height / puzzle.r;
+		puzzle.horizontal = save.horizontal;
+		puzzle.vertical = save.vertical;
+		return puzzle;
+	}
 }
 

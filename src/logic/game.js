@@ -5,7 +5,7 @@ import {randFloat, randInt, randChance} from "./random";
 const {OrthoCamera} = builtIn;
 
 export class PuzzleGame {
-	constructor(puzzle, canvas) {
+	constructor(puzzle, savedPieces, canvas) {
 		this.bvh = new BVH();
 
 		this.renderer = new Renderer(canvas);
@@ -24,6 +24,27 @@ export class PuzzleGame {
 
 				const piece = new Piece(id, i, j, this.renderer, image, puzzle.w, puzzle.h);
 
+				this.pieces.push(piece);
+				this.scene.add(piece.renderable);
+			}
+		}
+
+		// setup pieces (possibly with saved positions)
+		const groups = [];
+		for (let id = 0; id < this.pieces.length; id++) {
+			const piece = this.pieces[id];
+			if (savedPieces[id]) {
+				// restore saved data
+				const saved = savedPieces[id];
+				piece.x = saved.x;
+				piece.y = saved.y;
+				piece.orientation = saved.o;
+				if (id !== saved.groupId) {
+					this.pieces[saved.groupId].group.join(piece.group);
+				} else {
+					groups.push(piece.group);
+				}
+			} else {
 				// place pieces in random positions around a puzzle-sized hole
 				const w = puzzle.c;
 				const hw = w / 2;
@@ -38,13 +59,24 @@ export class PuzzleGame {
 				}
 
 				piece.orientation = randInt(0, 3);
+				groups.push(piece.group);
+			}
+		}
 
-				this.pieces.push(piece);
-				this.scene.add(piece.renderable);
-
-				// insert into bounding volume hierarchy
+		// insert groups of pieces into the bvh and init zIndex values
+		for (const group of groups) {
+			let zIndex = 0;
+			for (const piece of group.pieces) {
 				const hits = this.bvh.insert(piece);
-				piece.zIndex = Math.max(0, ...hits.map((h) => h.zIndex)) + 1;
+				for (const hit of hits) {
+					if (!group.pieces.has(hit) && hit.zIndex > zIndex) {
+						zIndex = hit.zIndex;
+					}
+				}
+			}
+
+			for (const piece of group.pieces) {
+				piece.zIndex = zIndex + 1;
 			}
 		}
 
@@ -132,6 +164,19 @@ export class PuzzleGame {
 			const distDiff = a.dist - b.dist;
 			return Math.abs(distDiff < .04) ? b.piece.zIndex - a.piece.zIndex : distDiff;
 		})[0].piece;
+	}
+	getPieces() {
+		const pieces = [];
+		for (const piece of this.pieces) {
+			pieces.push({
+				groupId: piece.group.id,
+				x: piece.x,
+				y: piece.y,
+				o: piece.orientation,
+			});
+		}
+
+		return pieces;
 	}
 	render() {
 		this.renderer.render(this.camera, this.scene);
