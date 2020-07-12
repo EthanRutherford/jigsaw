@@ -124,6 +124,7 @@ export function setupPointerControls(game, canvas) {
 		if (pState === pStates.piece && event.pointerId === pList[0].pointerId) {
 			updatePointer(pList[0], event);
 			dropGroup(game, pList[0]);
+			game.save();
 			pList.pop();
 			pState = pStates.none;
 		} else if (pState === pStates.camera) {

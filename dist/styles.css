@@ -28,6 +28,45 @@
 	width: 100vw;
 }
 
+.menu__save-wrapper--3lhws {
+	display: flex;
+}
+
+.menu__saved-game--XA_En {
+	display: flex;
+	align-items: center;
+	border-radius: 5px;
+	border: 1px solid black;
+	margin: 0;
+	padding: 0;
+	height: 100px;
+	overflow: hidden;
+	outline: none;
+}
+
+.menu__new-game--l881T {
+	display: flex;
+}
+
+.menu__snapshot--2fS0c {
+	width: 100px;
+	height: 100px;
+	object-fit: cover;
+}
+
+.menu__button-text--1e-rp {
+	padding: 10px;	
+}
+
+.menu__delete-button--13l_b {
+	margin-left: 10px;
+	width: 100px;
+}
+
+* {
+	box-sizing: border-box;
+}
+
 html, body {
 	height: 100%;
 	width: 100%;

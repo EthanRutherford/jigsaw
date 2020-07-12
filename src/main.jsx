@@ -1,7 +1,7 @@
 import {render} from "react-dom";
-import React, {useEffect, useState} from "react";
-import {Puzzle} from "./logic/puzzle/puzzle";
+import React, {useState} from "react";
 import {Game} from "./ui/game";
+import {Menu} from "./ui/menu";
 import "./styles/root.css";
 
 // register service worker
@@ -12,18 +12,13 @@ if ("serviceWorker" in navigator) {
 }
 
 function App() {
-	const [image, setImage] = useState();
-	useEffect(() => {
-		Puzzle.fetchImage(
-			"https://cdn.mos.cms.futurecdn.net/jbCNvTM4gwr2qV8X8fW3ZB.png",
-		).then(setImage);
-	}, []);
+	const [gameData, setGameData] = useState();
 
-	if (image == null) {
-		return null;
+	if (gameData == null) {
+		return <Menu startGame={setGameData} />;
 	}
 
-	return <Game image={image} columns={20} rows={10} />;
+	return <Game {...gameData} />;
 }
 
 render(<App />, document.getElementById("react-root"));
