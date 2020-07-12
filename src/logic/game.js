@@ -1,11 +1,13 @@
 import {Renderer, Scene, rgba, builtIn} from "2d-gl";
 import {AABB, BVH} from "./framework/bvh";
 import {Piece} from "./framework/piece";
+import {storeGame} from "./jigsaw-db";
 import {randFloat, randInt, randChance} from "./random";
 const {OrthoCamera} = builtIn;
 
 export class PuzzleGame {
-	constructor(puzzle, savedPieces, canvas) {
+	constructor(ids, puzzle, savedPieces, canvas) {
+		this.ids = ids;
 		this.bvh = new BVH();
 
 		this.renderer = new Renderer(canvas);
@@ -80,9 +82,8 @@ export class PuzzleGame {
 			}
 		}
 
-		// start render loop
-		this.render = this.render.bind(this);
-		this.render();
+		this.animId = null;
+		this.animLoop = this.animLoop.bind(this);
 	}
 	viewportToWorld(x, y) {
 		return this.renderer.viewportToWorld(x, y, this.camera);
@@ -178,8 +179,22 @@ export class PuzzleGame {
 
 		return pieces;
 	}
+	async save() {
+		await storeGame(this.ids.gameId, {
+			imageId: this.ids.imageId,
+			puzzleId: this.ids.puzzleId,
+			pieces: this.getPieces(),
+		});
+	}
+	animLoop() {
+		this.render();
+		this.animId = requestAnimationFrame(this.animLoop);
+	}
+	stopLoop() {
+		cancelAnimationFrame(this.animId);
+		this.animId = null;
+	}
 	render() {
 		this.renderer.render(this.camera, this.scene);
-		requestAnimationFrame(this.render);
 	}
 }
