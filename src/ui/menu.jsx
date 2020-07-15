@@ -3,6 +3,7 @@ import {getGameList, blobToImage, getImageList, storePuzzle, storeImage, deleteG
 import styles from "../styles/menu.css";
 import {Puzzle} from "../logic/puzzle/puzzle";
 import {PuzzleGame} from "../logic/game";
+import {Warning} from "./warning";
 
 function GameSnapshot({game}) {
 	const canvas = useRef();
@@ -21,6 +22,7 @@ function GameSnapshot({game}) {
 
 function SaveGamePicker({startGame, newGame}) {
 	const [gameList, setGameList] = useState();
+	const [deleteState, setDeleteState] = useState();
 	useEffect(() => {
 		getGameList().then(setGameList);
 	}, []);
@@ -62,16 +64,7 @@ function SaveGamePicker({startGame, newGame}) {
 					</button>
 					<button
 						className={styles.deleteButton}
-						onClick={async () => {
-							await deleteGame(game.id);
-							setGameList((list) => {
-								const index = list.findIndex((g) => g.id === game.id);
-								return [
-									...list.slice(0, index),
-									...list.slice(index + 1),
-								];
-							});
-						}}
+						onClick={() => setDeleteState({id: game.id})}
 					>
 						delete
 					</button>
@@ -85,12 +78,33 @@ function SaveGamePicker({startGame, newGame}) {
 					<div className={styles.buttonText}>New game</div>
 				</button>
 			)}
+			{deleteState != null && (
+				<Warning
+					header="Are you sure?"
+					content="This game cannot be restored later!"
+					confirm="Delete"
+					cancel="Cancel"
+					onConfirm={async () => {
+						await deleteGame(deleteState.id);
+						setDeleteState();
+						setGameList((list) => {
+							const index = list.findIndex((g) => g.id === deleteState.id);
+							return [
+								...list.slice(0, index),
+								...list.slice(index + 1),
+							];
+						});
+					}}
+					onCancel={() => setDeleteState()}
+				/>
+			)}
 		</div>
 	);
 }
 
 function ImagePicker({setImage}) {
 	const [imageList, setImageList] = useState([]);
+	const [deleteState, setDeleteState] = useState();
 	useEffect(() => {
 		getImageList().then(setImageList);
 	}, []);
@@ -111,19 +125,8 @@ function ImagePicker({setImage}) {
 					<button
 						className={styles.deleteButton}
 						onClick={async () => {
-							const gameCount = await getGamesUsingImageCount(image.id);
-
-							// TODO: translate confirm into a native component
-							if (confirm(`There are ${gameCount} games using this image, this action will also delete those games. Delete anyway?`)) {
-								await deleteImage(image.id);
-								setImageList((list) => {
-									const index = list.findIndex((i) => i.id === image.id);
-									return [
-										...list.slice(0, index),
-										...list.slice(index + 1),
-									];
-								});
-							}
+							const count = await getGamesUsingImageCount(image.id);
+							setDeleteState({id: image.id, count});
 						}}
 					>
 						delete
@@ -141,6 +144,26 @@ function ImagePicker({setImage}) {
 							setImageList((list) => [...list, {id, value: file}]);
 						}
 					}}
+				/>
+			)}
+			{deleteState != null && (
+				<Warning
+					header="Are you sure?"
+					content={`There are ${deleteState.count} games using this image, this action will also delete those games.`}
+					confirm="Delete"
+					cancel="Cancel"
+					onConfirm={async () => {
+						await deleteImage(deleteState.id);
+						setDeleteState();
+						setImageList((list) => {
+							const index = list.findIndex((i) => i.id === deleteState.id);
+							return [
+								...list.slice(0, index),
+								...list.slice(index + 1),
+							];
+						});
+					}}
+					onCancel={() => setDeleteState()}
 				/>
 			)}
 		</div>
@@ -184,6 +207,7 @@ function PuzzlePicker({gameId, image, startGame}) {
 	return (
 		<div>
 			<input
+				className={styles.input}
 				type="number"
 				value={columns}
 				onChange={(event) => setColumns(event.target.value)}
@@ -198,6 +222,7 @@ function PuzzlePicker({gameId, image, startGame}) {
 				max={50}
 			/>
 			<input
+				className={styles.input}
 				type="number"
 				value={rows}
 				onChange={(event) => setRows(event.target.value)}
@@ -212,6 +237,7 @@ function PuzzlePicker({gameId, image, startGame}) {
 				max={50}
 			/>
 			<button
+				className={styles.accept}
 				onClick={async () => {
 					const puzzle = new Puzzle(image.value, columns, rows);
 					const puzzleId = await storePuzzle(Puzzle.toSaveFormat(puzzle));

@@ -1,0 +1,40 @@
+.warning-overlay {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: rgba(0, 0, 0, .2);
+	z-index: 1000;
+}
+
+.warning-popup {
+	display: flex;
+	flex-direction: column;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	box-shadow: 2px 2px 20px 6px rgba(0, 0, 0, .2);
+	width: 600px;
+	max-width: calc(100vw - 20px);
+	background-color: white;
+}
+
+.warning-header {
+	padding: 20px;
+	background-color: hsl(0, 60%, 80%);
+	font-size: 30px;
+}
+
+.warning-content {
+	padding: 20px;
+}
+
+.button {
+	border: 1px solid black;
+	padding: 10px;
+	height: 50px;
+	width: 100%;
+	text-align: center;
+}
