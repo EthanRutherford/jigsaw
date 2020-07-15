@@ -159,7 +159,7 @@ export async function deleteGame(id) {
 	const puzzleStore = transaction.objectStore(puzzlesTable);
 	const gameStore = transaction.objectStore(gamesTable);
 
-	const game = await getCore(id);
+	const game = await getCore(gameStore, id);
 	await deleteCore(puzzleStore, game.puzzleId);
 	await deleteCore(gameStore, id);
 }
