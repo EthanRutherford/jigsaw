@@ -210,7 +210,14 @@ function PuzzlePicker({gameId, image, startGame}) {
 				className={styles.input}
 				type="number"
 				value={columns}
-				onChange={(event) => setColumns(event.target.value)}
+				onChange={(event) => {
+					setColumns(event.target.value);
+
+					const value = Number.parseInt(event.target.value, 10);
+					if (!Number.isNaN(value)) {
+						setRows(clamp(boundRows(w, h, clamp(value, 5, 50), rows), 5, 50));
+					}
+				}}
 				onBlur={() => {
 					let c = clamp(columns, 5, 50);
 					const r = clamp(boundRows(w, h, c, rows), 5, 50);
@@ -218,14 +225,21 @@ function PuzzlePicker({gameId, image, startGame}) {
 					setColumns(c);
 					setRows(r);
 				}}
-				min={5}
-				max={50}
+				min={Math.max(5, boundColumns(w, h, 5, 5))}
+				max={Math.min(50, boundColumns(w, h, 50, 50))}
 			/>
 			<input
 				className={styles.input}
 				type="number"
 				value={rows}
-				onChange={(event) => setRows(event.target.value)}
+				onChange={(event) => {
+					setRows(event.target.value);
+
+					const value = Number.parseInt(event.target.value, 10);
+					if (!Number.isNaN(value)) {
+						setColumns(clamp(boundColumns(w, h, columns, clamp(value, 5, 50)), 5, 50));
+					}
+				}}
 				onBlur={() => {
 					let r = clamp(rows, 5, 50);
 					const c = clamp(boundColumns(w, h, columns, r), 5, 50);
@@ -233,8 +247,8 @@ function PuzzlePicker({gameId, image, startGame}) {
 					setColumns(c);
 					setRows(r);
 				}}
-				min={5}
-				max={50}
+				min={Math.max(5, boundRows(w, h, 5, 5))}
+				max={Math.min(50, boundRows(w, h, 50, 50))}
 			/>
 			<button
 				className={styles.accept}
