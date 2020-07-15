@@ -58,7 +58,7 @@ function dragCamera(game, [p1, p2]) {
 		const actualDist = Math.sqrt((curPos1.x - curPos2.x) ** 2 + (curPos1.y - curPos2.y) ** 2);
 
 		const ratio = correctDist / actualDist;
-		game.camera.zoom = Math.max(2, Math.min(50, game.camera.zoom * ratio));
+		game.setZoom(game.camera.zoom * ratio);
 
 		// maintain world position of centroid
 		const newPos1 = game.viewportToWorld(p1.offsetX, p1.offsetY);

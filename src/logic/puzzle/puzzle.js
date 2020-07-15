@@ -81,9 +81,9 @@ export class Puzzle {
 	drawPiece(x, y) {
 		const {image, c, r, horizontal, vertical} = this;
 
-		// choose scale such that drawn images are at least 200px wide
-		// this is primarily to ensure the piece borders are fairly smooth
-		const scale = Math.ceil(200 / this.w);
+		// choose scale such that source image is at least 2000px wide
+		// this is primarily to ensure the piece borders are decently smooth
+		const scale = Math.ceil(2000 / image.width);
 		const w = this.w * scale;
 		const h = this.h * scale;
 

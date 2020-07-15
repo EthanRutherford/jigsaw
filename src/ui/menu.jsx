@@ -147,9 +147,39 @@ function ImagePicker({setImage}) {
 	);
 }
 
+const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+function boundColumns(w, h, c, r) {
+	const pieceWidth = w / c;
+	const pieceHeight = h / r;
+	if (pieceWidth < pieceHeight / 1.25) {
+		return Math.floor(w / (pieceHeight / 1.25));
+	}
+
+	if (pieceWidth > pieceHeight * 1.25) {
+		return Math.ceil(w / (pieceHeight * 1.25));
+	}
+
+	return c;
+}
+function boundRows(w, h, c, r) {
+	const pieceWidth = w / c;
+	const pieceHeight = h / r;
+	if (pieceHeight < pieceWidth / 1.25) {
+		return Math.floor(h / (pieceWidth / 1.25));
+	}
+
+	if (pieceHeight > pieceWidth * 1.25) {
+		return Math.ceil(h / (pieceWidth * 1.25));
+	}
+
+	return r;
+}
+
 function PuzzlePicker({gameId, image, startGame}) {
+	const w = image.value.width;
+	const h = image.value.height;
 	const [columns, setColumns] = useState(20);
-	const [rows, setRows] = useState(10);
+	const [rows, setRows] = useState(boundRows(w, h, 20, 10));
 
 	return (
 		<div>
@@ -157,17 +187,29 @@ function PuzzlePicker({gameId, image, startGame}) {
 				type="number"
 				value={columns}
 				onChange={(event) => setColumns(event.target.value)}
-				onBlur={() => setColumns((c) => Math.max(5, Math.min(100, c)))}
+				onBlur={() => {
+					let c = clamp(columns, 5, 50);
+					const r = clamp(boundRows(w, h, c, rows), 5, 50);
+					c = boundColumns(w, h, c, r);
+					setColumns(c);
+					setRows(r);
+				}}
 				min={5}
-				max={100}
+				max={50}
 			/>
 			<input
 				type="number"
 				value={rows}
 				onChange={(event) => setRows(event.target.value)}
-				onBlur={() => setRows((r) => Math.max(5, Math.min(100, r)))}
+				onBlur={() => {
+					let r = clamp(rows, 5, 50);
+					const c = clamp(boundColumns(w, h, columns, r), 5, 50);
+					r = boundRows(w, h, c, r);
+					setColumns(c);
+					setRows(r);
+				}}
 				min={5}
-				max={100}
+				max={50}
 			/>
 			<button
 				onClick={async () => {

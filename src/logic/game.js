@@ -10,9 +10,15 @@ export class PuzzleGame {
 		this.ids = ids;
 		this.bvh = new BVH();
 
+		// compute zoom bounds based on piece height and row count
+		const h = puzzle.h / puzzle.w;
+		const puzzleHeight = h * puzzle.r;
+		this.minZoom = puzzleHeight / 5;
+		this.maxZoom = puzzleHeight * 5;
+
 		this.renderer = new Renderer(canvas);
 		this.scene = new Scene({bgColor: rgba(.15, .15, .15, 1)});
-		this.camera = new OrthoCamera(0, 0, 20);
+		this.camera = new OrthoCamera(0, 0, puzzleHeight * 2);
 		this.scene.getVisibleFunc = (x0, y0, x1, y1) => {
 			return this.bvh.query(new AABB(x0, y0, x1, y1)).map((p) => p.renderable);
 		};
@@ -87,6 +93,9 @@ export class PuzzleGame {
 	}
 	viewportToWorld(x, y) {
 		return this.renderer.viewportToWorld(x, y, this.camera);
+	}
+	setZoom(zoom) {
+		this.camera.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, zoom));
 	}
 	placePieces(rootPiece) {
 		const {bvh} = this;
