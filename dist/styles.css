@@ -35,17 +35,30 @@
 .menu__saved-game--XA_En {
 	display: flex;
 	align-items: center;
-	border-radius: 5px;
 	border: 1px solid black;
+	border-radius: 5px;
 	margin: 0;
 	padding: 0;
 	height: 100px;
 	overflow: hidden;
-	outline: none;
+}
+
+.menu__button-text--1e-rp {
+	padding: 10px;	
+}
+
+.menu__delete-button--13l_b {
+	border: 1px solid black;
+	border-radius: 5px;
+	margin-left: 10px;
+	width: 100px;
 }
 
 .menu__new-game--l881T {
 	display: flex;
+	border: 1px solid black;
+	border-radius: 5px;
+	width: 100px;
 }
 
 .menu__snapshot--2fS0c {
@@ -54,22 +67,86 @@
 	object-fit: cover;
 }
 
-.menu__button-text--1e-rp {
-	padding: 10px;	
+.menu__input--3aNgg {
+	border: 1px solid black;
+	border-radius: 5px;
+	margin-right: 10px;
+	width: 100px;
 }
 
-.menu__delete-button--13l_b {
-	margin-left: 10px;
+.menu__accept--2eLjd {
+	border: 1px solid black;
+	border-radius: 5px;
 	width: 100px;
+}
+
+.warning__warning-overlay--2WGv6 {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background-color: rgba(0, 0, 0, .2);
+	z-index: 1000;
+}
+
+.warning__warning-popup--3-hII {
+	display: flex;
+	flex-direction: column;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	box-shadow: 2px 2px 20px 6px rgba(0, 0, 0, .2);
+	width: 600px;
+	max-width: calc(100vw - 20px);
+	background-color: white;
+}
+
+.warning__warning-header--T7rqO {
+	padding: 20px;
+	background-color: hsl(0, 60%, 80%);
+	font-size: 30px;
+}
+
+.warning__warning-content--2z0Pd {
+	padding: 20px;
+}
+
+.warning__button--1Llmk {
+	border: 1px solid black;
+	padding: 10px;
+	height: 50px;
+	width: 100%;
+	text-align: center;
 }
 
 * {
 	box-sizing: border-box;
 }
 
+html, body, div, span, p, a, img,
+h1, h2, h3, h4, h5, h6,
+b, u, i, center, ol, ul, li,
+label, button, input, select, textarea,
+canvas, footer, header {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	vertical-align: baseline;
+	color: inherit;
+	font: inherit;
+}
+:focus {
+	outline: 0;
+}
+button {
+	background: none;
+	cursor: pointer;
+}
+
 html, body {
 	height: 100%;
-	width: 100%;
-	margin: 0;
 }
 
