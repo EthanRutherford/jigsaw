@@ -14,7 +14,8 @@
 }
 
 .button-text {
-	padding: 10px;	
+	padding: 10px;
+	width: 200px;
 }
 
 .delete-button {
@@ -26,9 +27,10 @@
 
 .new-game {
 	display: flex;
+	justify-content: center;
 	border: 1px solid black;
 	border-radius: 5px;
-	width: 100px;
+	width: 200px;
 }
 
 .snapshot {
