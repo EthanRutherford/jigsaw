@@ -135,6 +135,7 @@ function ImagePicker({setImage}) {
 			))}
 			{imageList.length < 100 && (
 				<input
+					className={styles.file}
 					type="file"
 					accept="image/*"
 					onChange={async (event) => {
@@ -206,50 +207,56 @@ function PuzzlePicker({gameId, image, startGame}) {
 
 	return (
 		<div>
-			<input
-				className={styles.input}
-				type="number"
-				value={columns}
-				onChange={(event) => {
-					setColumns(event.target.value);
+			<label className={styles.label}>
+				Columns
+				<input
+					className={styles.input}
+					type="number"
+					value={columns}
+					onChange={(event) => {
+						setColumns(event.target.value);
 
-					const value = Number.parseInt(event.target.value, 10);
-					if (!Number.isNaN(value)) {
-						setRows(clamp(boundRows(w, h, clamp(value, 5, 50), rows), 5, 50));
-					}
-				}}
-				onBlur={() => {
-					let c = clamp(columns, 5, 50);
-					const r = clamp(boundRows(w, h, c, rows), 5, 50);
-					c = boundColumns(w, h, c, r);
-					setColumns(c);
-					setRows(r);
-				}}
-				min={Math.max(5, boundColumns(w, h, 5, 5))}
-				max={Math.min(50, boundColumns(w, h, 50, 50))}
-			/>
-			<input
-				className={styles.input}
-				type="number"
-				value={rows}
-				onChange={(event) => {
-					setRows(event.target.value);
+						const value = Number.parseInt(event.target.value, 10);
+						if (!Number.isNaN(value)) {
+							setRows(clamp(boundRows(w, h, clamp(value, 5, 50), rows), 5, 50));
+						}
+					}}
+					onBlur={() => {
+						let c = clamp(columns, 5, 50);
+						const r = clamp(boundRows(w, h, c, rows), 5, 50);
+						c = boundColumns(w, h, c, r);
+						setColumns(c);
+						setRows(r);
+					}}
+					min={Math.max(5, boundColumns(w, h, 5, 5))}
+					max={Math.min(50, boundColumns(w, h, 50, 50))}
+				/>
+			</label>
+			<label className={styles.label}>
+				Rows
+				<input
+					className={styles.input}
+					type="number"
+					value={rows}
+					onChange={(event) => {
+						setRows(event.target.value);
 
-					const value = Number.parseInt(event.target.value, 10);
-					if (!Number.isNaN(value)) {
-						setColumns(clamp(boundColumns(w, h, columns, clamp(value, 5, 50)), 5, 50));
-					}
-				}}
-				onBlur={() => {
-					let r = clamp(rows, 5, 50);
-					const c = clamp(boundColumns(w, h, columns, r), 5, 50);
-					r = boundRows(w, h, c, r);
-					setColumns(c);
-					setRows(r);
-				}}
-				min={Math.max(5, boundRows(w, h, 5, 5))}
-				max={Math.min(50, boundRows(w, h, 50, 50))}
-			/>
+						const value = Number.parseInt(event.target.value, 10);
+						if (!Number.isNaN(value)) {
+							setColumns(clamp(boundColumns(w, h, columns, clamp(value, 5, 50)), 5, 50));
+						}
+					}}
+					onBlur={() => {
+						let r = clamp(rows, 5, 50);
+						const c = clamp(boundColumns(w, h, columns, r), 5, 50);
+						r = boundRows(w, h, c, r);
+						setColumns(c);
+						setRows(r);
+					}}
+					min={Math.max(5, boundRows(w, h, 5, 5))}
+					max={Math.min(50, boundRows(w, h, 50, 50))}
+				/>
+			</label>
 			<button
 				className={styles.accept}
 				onClick={async () => {
@@ -263,7 +270,7 @@ function PuzzlePicker({gameId, image, startGame}) {
 					});
 				}}
 			>
-				Accept
+				Start game
 			</button>
 		</div>
 	);
@@ -273,15 +280,15 @@ export function Menu({startGame}) {
 	const [gameId, setGameId] = useState();
 	const [image, setImage] = useState();
 
-	if (gameId == null) {
-		return <SaveGamePicker startGame={startGame} newGame={setGameId} />;
-	}
-
-	if (image == null) {
-		return <ImagePicker setImage={setImage} />;
-	}
-
 	return (
-		<PuzzlePicker gameId={gameId} image={image} startGame={startGame} />
+		<div className={styles.menu}>
+			{gameId == null ? (
+				<SaveGamePicker startGame={startGame} newGame={setGameId} />
+			) : image == null ? (
+				<ImagePicker setImage={setImage} />
+			) : (
+				<PuzzlePicker gameId={gameId} image={image} startGame={startGame} />
+			)}
+		</div>
 	);
 }

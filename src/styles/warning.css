@@ -23,7 +23,7 @@
 
 .warning-header {
 	padding: 20px;
-	background-color: hsl(0, 60%, 80%);
+	background-color: var(--red-light);
 	font-size: 30px;
 }
 

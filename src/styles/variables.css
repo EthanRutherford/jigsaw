@@ -6,6 +6,11 @@
 	--large: 25px;
 	--huge: 30px;
 
+	/* sizes */
+	--content-max-width: 1200px;
+	--content-width: calc(100vw - 40px);
+	--header-height: 40px;
+
 	/* greys */
 	--not-white: hsl(0, 0%, 90%);
 	--not-ash: hsl(0, 0%, 85%);
