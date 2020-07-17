@@ -16,6 +16,7 @@ canvas, footer, header {
 }
 html {
 	font: var(--normal)/1.2 'Fredoka One';
+	color: var(--carbon);
 }
 :focus {
 	outline: 0;
@@ -25,6 +26,11 @@ button {
 	cursor: pointer;
 }
 
-html, body {
+html, body, :global(.root) {
 	height: 100%;
+}
+
+.app {
+	background: var(--not-white);
+	min-height: 100%;
 }

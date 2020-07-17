@@ -1,8 +1,23 @@
 @import url(https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap);
+.header__wrapper--1v-Qa {
+	box-shadow: 0 1px 2px 2px rgba(0, 0, 0, .2);
+	height: var(--header-height);
+	background: white;
+}
+
+.header__header--2LmBc {
+	display: flex;
+	align-items: center;
+	margin: auto;
+	width: var(--content-width);
+	max-width: var(--content-max-width);
+	height: 100%;
+}
+
 .game__container--28rCx {
 	position: relative;
-	width: 100vw;
-	height: 100vh;
+	width: 100%;
+	height: calc(100vh - var(--header-height));
 	overflow: hidden;
 }
 
@@ -29,8 +44,16 @@
 	width: 100vw;
 }
 
+.menu__menu--3rdlY {
+	margin: auto;
+	width: var(--content-width);
+	max-width: var(--content-max-width);
+	margin-top: 20px;
+}
+
 .menu__save-wrapper--3lhws {
 	display: flex;
+	margin-bottom: 10px;
 }
 
 .menu__saved-game--XA_En {
@@ -42,6 +65,7 @@
 	padding: 0;
 	height: 100px;
 	overflow: hidden;
+	background: white;
 }
 
 .menu__button-text--1e-rp {
@@ -54,6 +78,7 @@
 	border-radius: 5px;
 	margin-left: 10px;
 	width: 100px;
+	background: white;
 }
 
 .menu__new-game--l881T {
@@ -62,6 +87,7 @@
 	border: 1px solid black;
 	border-radius: 5px;
 	width: 200px;
+	background: white;
 }
 
 .menu__snapshot--2fS0c {
@@ -70,17 +96,28 @@
 	object-fit: cover;
 }
 
+.menu__file--3v1zW {
+	width: 300px;
+}
+
+.menu__label--3Lz2G {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 10px;
+	width: 200px;
+}
+
 .menu__input--3aNgg {
 	border: 1px solid black;
 	border-radius: 5px;
-	margin-right: 10px;
 	width: 100px;
 }
 
 .menu__accept--2eLjd {
 	border: 1px solid black;
 	border-radius: 5px;
-	width: 100px;
+	width: 200px;
+	background: white;
 }
 
 .warning__warning-overlay--2WGv6 {
@@ -108,7 +145,7 @@
 
 .warning__warning-header--T7rqO {
 	padding: 20px;
-	background-color: hsl(0, 60%, 80%);
+	background-color: var(--red-light);
 	font-size: 30px;
 }
 
@@ -131,6 +168,11 @@
 	--normal: 20px;
 	--large: 25px;
 	--huge: 30px;
+
+	/* sizes */
+	--content-max-width: 1200px;
+	--content-width: calc(100vw - 40px);
+	--header-height: 40px;
 
 	/* greys */
 	--not-white: hsl(0, 0%, 90%);
@@ -163,6 +205,7 @@ canvas, footer, header {
 }
 html {
 	font: var(--normal)/1.2 'Fredoka One';
+	color: var(--carbon);
 }
 :focus {
 	outline: 0;
@@ -172,7 +215,12 @@ button {
 	cursor: pointer;
 }
 
-html, body {
+html, body, .root {
 	height: 100%;
+}
+
+.root__app--2mMcH {
+	background: var(--not-white);
+	min-height: 100%;
 }
 

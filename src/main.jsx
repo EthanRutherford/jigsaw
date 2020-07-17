@@ -1,8 +1,9 @@
 import {render} from "react-dom";
 import React, {useState} from "react";
+import {Header} from "./ui/header";
 import {Game} from "./ui/game";
 import {Menu} from "./ui/menu";
-import "./styles/root.css";
+import styles from "./styles/root.css";
 
 // register service worker
 if ("serviceWorker" in navigator) {
@@ -14,11 +15,16 @@ if ("serviceWorker" in navigator) {
 function App() {
 	const [gameData, setGameData] = useState();
 
-	if (gameData == null) {
-		return <Menu startGame={setGameData} />;
-	}
-
-	return <Game {...gameData} />;
+	return (
+		<div className={styles.app}>
+			<Header />
+			{gameData == null ? (
+				<Menu startGame={setGameData} />
+			) : (
+				<Game {...gameData} />
+			)}
+		</div>
+	);
 }
 
 render(<App />, document.getElementById("react-root"));

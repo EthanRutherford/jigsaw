@@ -1,5 +1,13 @@
+.menu {
+	margin: auto;
+	width: var(--content-width);
+	max-width: var(--content-max-width);
+	margin-top: 20px;
+}
+
 .save-wrapper {
 	display: flex;
+	margin-bottom: 10px;
 }
 
 .saved-game {
@@ -11,6 +19,7 @@
 	padding: 0;
 	height: 100px;
 	overflow: hidden;
+	background: white;
 }
 
 .button-text {
@@ -23,6 +32,7 @@
 	border-radius: 5px;
 	margin-left: 10px;
 	width: 100px;
+	background: white;
 }
 
 .new-game {
@@ -31,6 +41,7 @@
 	border: 1px solid black;
 	border-radius: 5px;
 	width: 200px;
+	background: white;
 }
 
 .snapshot {
@@ -39,15 +50,26 @@
 	object-fit: cover;
 }
 
+.file {
+	width: 300px;
+}
+
+.label {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 10px;
+	width: 200px;
+}
+
 .input {
 	border: 1px solid black;
 	border-radius: 5px;
-	margin-right: 10px;
 	width: 100px;
 }
 
 .accept {
 	border: 1px solid black;
 	border-radius: 5px;
-	width: 100px;
+	width: 200px;
+	background: white;
 }
