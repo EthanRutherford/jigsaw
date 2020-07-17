@@ -1,6 +1,5 @@
-* {
-	box-sizing: border-box;
-}
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
+@import "./variables.css";
 
 html, body, div, span, p, a, img,
 h1, h2, h3, h4, h5, h6,
@@ -14,6 +13,9 @@ canvas, footer, header {
 	vertical-align: baseline;
 	color: inherit;
 	font: inherit;
+}
+html {
+	font: var(--normal)/1.2 'Fredoka One';
 }
 :focus {
 	outline: 0;

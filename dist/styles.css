@@ -1,3 +1,4 @@
+@import url(https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap);
 .game__container--28rCx {
 	position: relative;
 	width: 100vw;
@@ -44,7 +45,8 @@
 }
 
 .menu__button-text--1e-rp {
-	padding: 10px;	
+	padding: 10px;
+	width: 200px;
 }
 
 .menu__delete-button--13l_b {
@@ -56,9 +58,10 @@
 
 .menu__new-game--l881T {
 	display: flex;
+	justify-content: center;
 	border: 1px solid black;
 	border-radius: 5px;
-	width: 100px;
+	width: 200px;
 }
 
 .menu__snapshot--2fS0c {
@@ -121,8 +124,28 @@
 	text-align: center;
 }
 
-* {
-	box-sizing: border-box;
+:root {
+	/* font-sizes */
+	--tiny: 10px;
+	--small: 15px;
+	--normal: 20px;
+	--large: 25px;
+	--huge: 30px;
+
+	/* greys */
+	--not-white: hsl(0, 0%, 90%);
+	--not-ash: hsl(0, 0%, 85%);
+	--ash-light: hsl(0, 0%, 80%);
+	--ash: hsl(0, 0%, 70%);
+	--ash-dark: hsl(0, 0%, 60%);
+	--grey: hsl(0, 0%, 50%);
+	--slate-light: hsl(0, 0%, 40%);
+	--slate: hsl(0, 0%, 30%);
+	--slate-dark: hsl(0, 0%, 20%);
+	--carbon: hsl(0, 0%, 12%);
+
+	/* reds */
+	--red-light: hsl(0, 60%, 80%);
 }
 
 html, body, div, span, p, a, img,
@@ -137,6 +160,9 @@ canvas, footer, header {
 	vertical-align: baseline;
 	color: inherit;
 	font: inherit;
+}
+html {
+	font: var(--normal)/1.2 'Fredoka One';
 }
 :focus {
 	outline: 0;
