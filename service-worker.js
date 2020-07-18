@@ -29,19 +29,6 @@ workbox.routing.registerRoute(
 	}),
 );
 
-// cache application images
-workbox.routing.registerRoute(
-	/(?:\.jpg)$/,
-	workbox.strategies.cacheFirst({
-		cacheName: "jigsaw-application-images",
-		plugins: [
-			new workbox.expiration.Plugin({
-				maxAgeSeconds: 60 * 60 * 24 * 365,
-			}),
-		],
-	}),
-);
-
 // cache the application code
 workbox.routing.registerRoute(
 	/(?:\.js|\.css|\/)$/,
