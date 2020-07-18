@@ -5,14 +5,6 @@ workbox.setConfig({
 	debug: true,
 });
 
-// cache cors-anywhere responses
-workbox.routing.registerRoute(
-	(request) => request.url.host === "cors-anywhere.herokuapp.com",
-	workbox.strategies.cacheFirst({
-		cacheName: "cors-anywhere-images",
-	}),
-);
-
 // cache the Google Fonts stylesheets
 workbox.routing.registerRoute(
 	/^https:\/\/fonts\.googleapis\.com/,
