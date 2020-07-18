@@ -5,14 +5,6 @@ workbox.setConfig({
 	debug: true,
 });
 
-// cache cors-anywhere responses
-workbox.routing.registerRoute(
-	(request) => request.url.host === "cors-anywhere.herokuapp.com",
-	workbox.strategies.cacheFirst({
-		cacheName: "cors-anywhere-images",
-	}),
-);
-
 // cache the Google Fonts stylesheets
 workbox.routing.registerRoute(
 	/^https:\/\/fonts\.googleapis\.com/,
@@ -30,6 +22,19 @@ workbox.routing.registerRoute(
 			new workbox.cacheableResponse.Plugin({
 				statuses: [0, 200],
 			}),
+			new workbox.expiration.Plugin({
+				maxAgeSeconds: 60 * 60 * 24 * 365,
+			}),
+		],
+	}),
+);
+
+// cache application images
+workbox.routing.registerRoute(
+	/(?:\.jpg)$/,
+	workbox.strategies.cacheFirst({
+		cacheName: "jigsaw-application-images",
+		plugins: [
 			new workbox.expiration.Plugin({
 				maxAgeSeconds: 60 * 60 * 24 * 365,
 			}),
