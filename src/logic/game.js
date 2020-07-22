@@ -41,14 +41,16 @@ export class PuzzleGame {
 		const groups = [];
 		for (let id = 0; id < this.pieces.length; id++) {
 			const piece = this.pieces[id];
-			if (savedPieces[id]) {
+			if (savedPieces[id] != null) {
 				// restore saved data
 				const saved = savedPieces[id];
 				piece.x = saved.x;
 				piece.y = saved.y;
 				piece.orientation = saved.o;
 				if (id !== saved.groupId) {
-					this.pieces[saved.groupId].group.join(piece.group);
+					const group = this.pieces[saved.groupId].group;
+					group.pieces.add(piece);
+					piece.group = group;
 				} else {
 					groups.push(piece.group);
 				}
