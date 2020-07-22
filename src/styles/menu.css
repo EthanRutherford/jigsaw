@@ -50,6 +50,10 @@
 	object-fit: cover;
 }
 
+.hint {
+	margin-bottom: 10px;
+}
+
 .file {
 	width: 300px;
 }

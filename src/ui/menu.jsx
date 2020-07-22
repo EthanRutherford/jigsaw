@@ -102,6 +102,7 @@ function SaveGamePicker({startGame, newGame}) {
 	);
 }
 
+const artHref = "https://www.creativebloq.com/features/how-to-break-into-pixel-art";
 function ImagePicker({setImage}) {
 	const [imageList, setImageList] = useState([]);
 	const [deleteState, setDeleteState] = useState();
@@ -111,6 +112,10 @@ function ImagePicker({setImage}) {
 
 	return (
 		<div>
+			<div className={styles.hint}>
+				Need some inspiration? Check <a href={artHref}>here</a> for some
+				pixel art that makes for excellent puzzles!
+			</div>
 			{imageList.map((image) => (
 				<div className={styles.saveWrapper} key={image.id}>
 					<button
