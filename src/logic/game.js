@@ -28,9 +28,9 @@ export class PuzzleGame {
 		for (let i = 0; i < puzzle.c; i++) {
 			for (let j = 0; j < puzzle.r; j++) {
 				const id = i * puzzle.r + j;
-				const image = puzzle.drawPiece(i, j);
+				const images = puzzle.drawPiece(i, j);
 
-				const piece = new Piece(id, i, j, this.renderer, image, puzzle.w, puzzle.h);
+				const piece = new Piece(id, i, j, this.renderer, images, puzzle.w, puzzle.h);
 
 				this.pieces.push(piece);
 				this.scene.add(piece.renderable);
@@ -86,7 +86,7 @@ export class PuzzleGame {
 			}
 
 			for (const piece of group.pieces) {
-				piece.zIndex = zIndex + 1;
+				piece.zIndex = zIndex + 2;
 			}
 		}
 
@@ -150,7 +150,7 @@ export class PuzzleGame {
 		}
 
 		for (const piece of rootPiece.group.pieces) {
-			piece.zIndex = zIndex + 1;
+			piece.zIndex = zIndex + 2;
 		}
 	}
 	query(pos) {
