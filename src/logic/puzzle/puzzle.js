@@ -16,6 +16,16 @@ function reverseEdge(edge, fx, fy) {
 	}).reverse();
 }
 
+function makeShadow(piece) {
+	const shadow = document.createElement("canvas");
+	shadow.width = piece.width;
+	shadow.height = piece.height;
+	const context = shadow.getContext("2d");
+	context.globalAlpha = .5;
+	context.drawImage(piece, 0, 0);
+	return shadow;
+}
+
 export class Puzzle {
 	constructor(image, columns, rows) {
 		this.image = image;
@@ -87,16 +97,16 @@ export class Puzzle {
 		const w = this.w * scale;
 		const h = this.h * scale;
 
-		const canvas = document.createElement("canvas");
-		canvas.width = w * 2;
-		canvas.height = h * 2;
+		const piece = document.createElement("canvas");
+		piece.width = w * 2;
+		piece.height = h * 2;
 
 		const left = w / 2;
 		const right = w * 2 - w / 2;
 		const top = h / 2;
 		const bottom = h * 2 - h / 2;
 
-		const context = canvas.getContext("2d");
+		const context = piece.getContext("2d");
 		context.beginPath();
 		context.moveTo(left, top);
 
@@ -133,11 +143,16 @@ export class Puzzle {
 		}
 
 		context.fill();
+
+		// make shadow from current state
+		const shadow = makeShadow(piece);
+
+		// paint image into the piece
 		context.globalCompositeOperation = "source-in";
 		context.imageSmoothingEnabled = false;
 		context.drawImage(image, left - (x * w), top - (y * h), image.width * scale, image.height * scale);
 
-		return canvas;
+		return [piece, shadow];
 	}
 	static fetchImage(url) {
 		// uses third party service to get past CORS

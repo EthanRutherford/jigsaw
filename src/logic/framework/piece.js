@@ -37,7 +37,7 @@ class Group {
 }
 
 export class Piece {
-	constructor(id, x, y, renderer, image, w, h) {
+	constructor(id, x, y, renderer, [pieceImg, shadowImg], w, h) {
 		this.id = id;
 		this.puzzleCoords = {x, y};
 		this.w = 1;
@@ -50,13 +50,23 @@ export class Piece {
 			{x: -this.w, y: this.h},
 		]);
 
-		const material = new SpriteMaterial(
-			[{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}],
-			image, false,
-		);
+		const spriteCoords = [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}];
+		const shadowMaterial = new SpriteMaterial(spriteCoords, shadowImg);
+		const pieceMaterial = new SpriteMaterial(spriteCoords, pieceImg, false);
 
-		this.renderable = renderer.getInstance(shape, material);
+		this.renderable = renderer.getInstance(shape, pieceMaterial);
 		this.group = new Group(this);
+
+		// attach shadow renderable as a child
+		const shadow = renderer.getInstance(shape, shadowMaterial);
+		this.renderable.getChildren = () => {
+			const rotate = quickRotate[(4 - this.orientation) % 4];
+			const p = rotate({x: .1, y: -.1});
+			shadow.x = p.x;
+			shadow.y = p.y;
+			shadow.zIndex = this.renderable.zIndex - 1;
+			return [shadow];
+		};
 	}
 	get x() {return this.renderable.x;}
 	set x(v) {return this.renderable.x = v;}
