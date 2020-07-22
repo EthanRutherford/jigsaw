@@ -76,7 +76,6 @@ export class PuzzleGame {
 		// insert groups of pieces into the bvh and init zIndex values
 		for (const group of groups) {
 			let zIndex = 0;
-			console.log(group);
 			for (const piece of group.pieces) {
 				const hits = this.bvh.insert(piece);
 				for (const hit of hits) {
