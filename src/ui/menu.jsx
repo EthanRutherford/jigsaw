@@ -104,8 +104,10 @@ function SaveGamePicker({startGame, newGame}) {
 
 const artHref = "https://www.creativebloq.com/features/how-to-break-into-pixel-art";
 function ImagePicker({setImage}) {
+	const fileInput = useRef();
 	const [imageList, setImageList] = useState([]);
 	const [deleteState, setDeleteState] = useState();
+	const [isDragging, setIsDragging] = useState(false);
 	useEffect(() => {
 		getImageList().then(setImageList);
 	}, []);
@@ -139,18 +141,77 @@ function ImagePicker({setImage}) {
 				</div>
 			))}
 			{imageList.length < 100 && (
-				<input
-					className={styles.file}
-					type="file"
-					accept="image/*"
-					onChange={async (event) => {
-						const file = event.target.files[0];
-						if (file.type.startsWith("image")) {
+				<div
+					className={`${styles.dropArea} ${isDragging ? styles.dragOver : ""}`}
+					onDragOver={(event) => event.preventDefault()}
+					onDragEnter={(event) => {
+						if (
+							!isDragging &&
+							event.dataTransfer.types.length > 0 &&
+							event.dataTransfer.types[0] === "Files"
+						) {
+							event.preventDefault();
+							setIsDragging(true);
+						}
+					}}
+					onDragLeave={(event) => {
+						if (
+							event.currentTarget !== event.relatedTarget &&
+							!event.currentTarget.contains(event.relatedTarget) &&
+							!event.currentTarget.contains(event.relatedTarget.getRootNode().host)
+						) {
+							event.preventDefault();
+							setIsDragging(false);
+						}
+					}}
+					onDrop={async (event) => {
+						event.preventDefault();
+						setIsDragging(false);
+						if (
+							event.dataTransfer.files.length > 0 &&
+							event.dataTransfer.files[0].type.startsWith("image")
+						) {
+							const file = event.dataTransfer.files[0];
 							const id = await storeImage(file);
 							setImageList((list) => [...list, {id, value: file}]);
 						}
 					}}
-				/>
+				>
+					<input
+						className={styles.pasteArea}
+						placeholder="paste image data"
+						value=""
+						onChange={() => {}}
+						onPaste={async (event) => {
+							if (event.clipboardData.files.length !== 0) {
+								const file = event.clipboardData.files[0];
+								if (file.type.startsWith("image")) {
+									const id = await storeImage(file);
+									setImageList((list) => [...list, {id, value: file}]);
+								}
+							}
+						}}
+					/>
+					<button
+						className={styles.uploadButton}
+						onClick={() => fileInput.current.click()}
+					>
+						upload image
+					</button>
+					<input
+						className={styles.invisibleFile}
+						type="file"
+						accept="image/*"
+						onChange={async (event) => {
+							const file = event.target.files[0];
+							if (file.type.startsWith("image")) {
+								const id = await storeImage(file);
+								setImageList((list) => [...list, {id, value: file}]);
+							}
+						}}
+						ref={fileInput}
+					/>
+				</div>
 			)}
 			{deleteState != null && (
 				<Warning
