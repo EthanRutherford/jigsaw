@@ -99,6 +99,12 @@ export class PuzzleGame {
 	setZoom(zoom) {
 		this.camera.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, zoom));
 	}
+	grabPieces(rootPiece) {
+		for (const piece of rootPiece.group.pieces) {
+			piece.grabbed = true;
+			piece.zIndex = 999;
+		}
+	}
 	placePieces(rootPiece) {
 		const {bvh} = this;
 
@@ -150,6 +156,7 @@ export class PuzzleGame {
 		}
 
 		for (const piece of rootPiece.group.pieces) {
+			piece.grabbed = false;
 			piece.zIndex = zIndex + 2;
 		}
 	}

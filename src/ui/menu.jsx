@@ -1,9 +1,10 @@
 import React, {useState, useEffect, useRef} from "react";
 import {getGameList, blobToImage, getImageList, storePuzzle, storeImage, deleteGame, deleteImage, getGamesUsingImageCount} from "../logic/jigsaw-db";
-import styles from "../styles/menu.css";
 import {Puzzle} from "../logic/puzzle/puzzle";
 import {PuzzleGame} from "../logic/game";
 import {Warning} from "./warning";
+import styles from "../styles/menu.css";
+import {notifyCanPrompt, promptForInstall} from "../pwa/install-prompt";
 
 function GameSnapshot({game}) {
 	const canvas = useRef();
@@ -21,10 +22,13 @@ function GameSnapshot({game}) {
 }
 
 function SaveGamePicker({startGame, newGame}) {
+	const [canPrompt, setCanPrompt] = useState();
 	const [gameList, setGameList] = useState();
 	const [deleteState, setDeleteState] = useState();
 	useEffect(() => {
 		getGameList().then(setGameList);
+		notifyCanPrompt(setCanPrompt);
+		return () => notifyCanPrompt(null);
 	}, []);
 
 	if (gameList == null) {
@@ -76,6 +80,14 @@ function SaveGamePicker({startGame, newGame}) {
 					onClick={() => newGame(firstBlank)}
 				>
 					<div className={styles.buttonText}>New game</div>
+				</button>
+			)}
+			{canPrompt && (
+				<button
+					className={styles.button}
+					onClick={() => promptForInstall().then(() => setCanPrompt(false))}
+				>
+					add to homescreen
 				</button>
 			)}
 			{deleteState != null && (

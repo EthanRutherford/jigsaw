@@ -43,6 +43,14 @@
 	width: 200px;
 	background: white;
 }
+.add-to-homescreen {
+	display: flex;
+	justify-content: center;
+	border: 1px solid black;
+	border-radius: 5px;
+	width: 200px;
+	background: white;
+}
 
 .snapshot {
 	width: 100px;
