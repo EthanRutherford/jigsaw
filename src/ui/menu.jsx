@@ -27,7 +27,7 @@ function SaveGamePicker({startGame, newGame}) {
 	const [deleteState, setDeleteState] = useState();
 	useEffect(() => {
 		getGameList().then(setGameList);
-		notifyCanPrompt(setCanPrompt);
+		notifyCanPrompt(() => setCanPrompt(true));
 		return () => notifyCanPrompt(null);
 	}, []);
 
@@ -79,12 +79,12 @@ function SaveGamePicker({startGame, newGame}) {
 					className={styles.newGame}
 					onClick={() => newGame(firstBlank)}
 				>
-					<div className={styles.buttonText}>New game</div>
+					New game
 				</button>
 			)}
 			{canPrompt && (
 				<button
-					className={styles.button}
+					className={styles.addToHomescreen}
 					onClick={() => promptForInstall().then(() => setCanPrompt(false))}
 				>
 					add to homescreen
