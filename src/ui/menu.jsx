@@ -133,7 +133,7 @@ function ImagePicker({setImage}) {
 			{imageList.map((image) => (
 				<div className={styles.saveWrapper} key={image.id}>
 					<button
-						className={styles.savedGame}
+						className={styles.imageButton}
 						onClick={async () => setImage({
 							value: await blobToImage(image.value),
 							id: image.id,

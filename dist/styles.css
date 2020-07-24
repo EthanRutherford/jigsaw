@@ -102,12 +102,18 @@
 	align-items: center;
 	border: 1px solid black;
 	border-radius: 5px;
-	margin: 0;
-	padding: 0;
 	width: 300px;
 	height: 100px;
 	overflow: hidden;
 	background: white;
+}
+.menu__image-button--2VBCz {
+	border: 1px solid black;
+	border-radius: 5px;
+	width: 100px;
+	height: 100px;
+	background: white;
+	overflow: hidden;
 }
 
 .menu__button-text--1e-rp {
