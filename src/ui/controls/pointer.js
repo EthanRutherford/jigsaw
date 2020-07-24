@@ -4,10 +4,8 @@ const pStates = {
 	camera: 2,
 };
 
-function initDragPointer(hit, pos) {
-	for (const piece of hit.group.pieces) {
-		piece.zIndex = 999;
-	}
+function initDragPointer(game, hit, pos) {
+	game.grabPieces(hit);
 
 	return {
 		root: hit,
@@ -92,7 +90,7 @@ export function setupPointerControls(game, canvas) {
 
 			if (hit != null) {
 				pState = pStates.piece;
-				pList.push(updatePointer(initDragPointer(hit, pos), event));
+				pList.push(updatePointer(initDragPointer(game, hit, pos), event));
 			} else {
 				pState = pStates.camera;
 				pList.push(updatePointer({pos}, event));

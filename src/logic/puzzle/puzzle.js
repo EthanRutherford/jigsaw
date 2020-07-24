@@ -21,7 +21,7 @@ function makeShadow(piece) {
 	shadow.width = piece.width;
 	shadow.height = piece.height;
 	const context = shadow.getContext("2d");
-	context.globalAlpha = .5;
+	context.globalAlpha = .25;
 	context.drawImage(piece, 0, 0);
 	return shadow;
 }

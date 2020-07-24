@@ -42,6 +42,7 @@ export class Piece {
 		this.puzzleCoords = {x, y};
 		this.w = 1;
 		this.h = h / w;
+		this.grabbed = false;
 
 		const shape = new Shape([
 			{x: -this.w, y: -this.h},
@@ -61,7 +62,8 @@ export class Piece {
 		const shadow = renderer.getInstance(shape, shadowMaterial);
 		this.renderable.getChildren = () => {
 			const rotate = quickRotate[(4 - this.orientation) % 4];
-			const p = rotate({x: .1, y: -.1});
+			const offset = this.grabbed ? .1 : .05;
+			const p = rotate({x: offset, y: -offset});
 			shadow.x = p.x;
 			shadow.y = p.y;
 			shadow.zIndex = this.renderable.zIndex - 1;
