@@ -1,5 +1,4 @@
 import {builtIn} from "2d-gl";
-import {pieceImageScale} from "../constants";
 const {Shape, SpriteMaterial} = builtIn;
 
 const quickRotate = {
@@ -45,9 +44,9 @@ export class Piece {
 		this.h = h / w;
 		this.grabbed = false;
 
-		// image was expanded by a skin to make room for the nubs
-		const hw = this.w * pieceImageScale / 2;
-		const hh = this.h * pieceImageScale / 2;
+		// compute ratio of image pixels to piece rect pixels
+		const hw = this.w * (pieceImg.width / w) / 2;
+		const hh = this.h * (pieceImg.height / h) / 2;
 		const shape = new Shape([
 			{x: -hw, y: -hh},
 			{x: hw, y: -hh},
