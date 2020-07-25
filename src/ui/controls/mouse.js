@@ -21,9 +21,10 @@ export function mouseZoomPan(game, event) {
 	// zoom/pan logic
 	if (event.ctrlKey) {
 		// zoom
+		const zoomValue = 1 - dy / 1000;
 		const offx = event.offsetX, offy = event.offsetY;
 		const oldPos = game.viewportToWorld(offx, offy);
-		game.setZoom(game.camera.zoom - dy / 100);
+		game.setZoom(game.camera.zoom * zoomValue);
 
 		// center zoom on mouse position
 		const newPos = game.viewportToWorld(offx, offy);
