@@ -33,6 +33,7 @@ class Node {
 		this.children = [];
 		this.height = height;
 		this.piece = null;
+		this.thinAABB = null;
 	}
 	get isLeaf() {
 		return this.children.length === 0;
@@ -267,16 +268,21 @@ export class BVH {
 		this.pieceToNode = {};
 	}
 	insert(piece) {
-		// make the aabb a bit bigger to account for the nubs
-		const hw = piece.w * 1.2 / 2;
-		const hh = piece.h * 1.2 / 2;
+		const hw = piece.w / 2;
+		const hh = piece.h / 2;
 		const aabb = new AABB(piece.x - hw, piece.y - hh, piece.x + hw, piece.y + hh);
 
-		const node = this.tree.insert(aabb);
+		// make a fat aabb to contain the nubs
+		const sw = piece.w * .25;
+		const sh = piece.h * .25;
+		const fat = new AABB(aabb.min.x - sw, aabb.min.y - sh, aabb.max.x + sw, aabb.max.y + sh);
+
+		const node = this.tree.insert(fat);
 		node.piece = piece;
+		node.thinAABB = aabb;
 		this.pieceToNode[piece.id] = node;
 
-		return this.query(aabb);
+		return this.query(fat);
 	}
 	remove(piece) {
 		this.tree.remove(this.pieceToNode[piece.id]);
@@ -284,7 +290,7 @@ export class BVH {
 	}
 	query(aabb) {
 		const contacts = [];
-		this.tree.query(aabb, (contact) => contacts.push(contact.piece));
+		this.tree.query(aabb, (contact) => contacts.push(contact));
 		return contacts;
 	}
 }

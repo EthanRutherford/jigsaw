@@ -98,13 +98,13 @@ export class Puzzle {
 		const h = this.h * scale;
 
 		const piece = document.createElement("canvas");
-		piece.width = w * 2;
-		piece.height = h * 2;
+		piece.width = w * 1.5;
+		piece.height = h * 1.5;
 
-		const left = w / 2;
-		const right = w * 2 - w / 2;
-		const top = h / 2;
-		const bottom = h * 2 - h / 2;
+		const left = w * .25;
+		const right = piece.width - w * .25;
+		const top = h * .25;
+		const bottom = piece.height - h * .25;
 
 		const context = piece.getContext("2d");
 		context.beginPath();

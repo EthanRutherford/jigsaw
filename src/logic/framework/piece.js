@@ -44,11 +44,14 @@ export class Piece {
 		this.h = h / w;
 		this.grabbed = false;
 
+		// image was expanded by a skin to make room for the nubs
+		const hw = this.w * 1.5 / 2;
+		const hh = this.h * 1.5 / 2;
 		const shape = new Shape([
-			{x: -this.w, y: -this.h},
-			{x: this.w, y: -this.h},
-			{x: this.w, y: this.h},
-			{x: -this.w, y: this.h},
+			{x: -hw, y: -hh},
+			{x: hw, y: -hh},
+			{x: hw, y: hh},
+			{x: -hw, y: hh},
 		]);
 
 		const spriteCoords = [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}];
