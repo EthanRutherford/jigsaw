@@ -20,7 +20,7 @@ export class PuzzleGame {
 		this.scene = new Scene({bgColor: rgba(.15, .15, .15, 1)});
 		this.camera = new OrthoCamera(0, 0, puzzleHeight * 2);
 		this.scene.getVisibleFunc = (x0, y0, x1, y1) => {
-			return this.bvh.query(new AABB(x0, y0, x1, y1)).map((p) => p.renderable);
+			return this.bvh.query(new AABB(x0, y0, x1, y1)).map((p) => p.piece.renderable);
 		};
 
 		// create pieces
@@ -77,7 +77,7 @@ export class PuzzleGame {
 		for (const group of groups) {
 			let zIndex = 0;
 			for (const piece of group.pieces) {
-				const hits = this.bvh.insert(piece);
+				const hits = this.bvh.insert(piece).map((c) => c.piece);
 				for (const hit of hits) {
 					if (!group.pieces.has(hit) && hit.zIndex > zIndex) {
 						zIndex = hit.zIndex;
@@ -111,7 +111,7 @@ export class PuzzleGame {
 		let snapToPiece = rootPiece;
 		for (const piece of rootPiece.group.pieces) {
 			bvh.remove(piece);
-			const hits = bvh.insert(piece);
+			const hits = bvh.insert(piece).map((c) => c.piece);
 
 			// check for connections
 			const filtered = hits.filter((p) => !piece.group.pieces.has(p));
@@ -127,7 +127,7 @@ export class PuzzleGame {
 				// check if within snapping distance
 				const correctPos = piece.getConnectedPosition(other);
 				const error = {x: correctPos.x - other.x, y: correctPos.y - other.y};
-				if (error.x ** 2 + error.y ** 2 > .04) {
+				if (error.x ** 2 + error.y ** 2 > .0625) {
 					continue;
 				}
 
@@ -147,7 +147,7 @@ export class PuzzleGame {
 		let zIndex = 0;
 		for (const piece of rootPiece.group.pieces) {
 			bvh.remove(piece);
-			const hits = bvh.insert(piece);
+			const hits = bvh.insert(piece).map((c) => c.piece);
 			for (const hit of hits) {
 				if (!piece.group.pieces.has(hit) && hit.zIndex > zIndex) {
 					zIndex = hit.zIndex;
@@ -170,9 +170,10 @@ export class PuzzleGame {
 			pos.y + camera.zoom / 200,
 		);
 
-		const hits = bvh.query(hitArea).map((p) => ({
-			piece: p,
-			dist: (p.x - pos.x) ** 2 + (p.y - pos.y) ** 2,
+		const hits = bvh.query(hitArea).map((c) => ({
+			piece: c.piece,
+			hitInner: hitArea.test(c.thinAABB) ? 1 : 0,
+			dist: (c.piece.x - pos.x) ** 2 + (c.piece.y - pos.y) ** 2,
 		}));
 
 		if (hits.length === 0) {
@@ -180,8 +181,10 @@ export class PuzzleGame {
 		}
 
 		return hits.sort((a, b) => {
-			const distDiff = a.dist - b.dist;
-			return Math.abs(distDiff < .04) ? b.piece.zIndex - a.piece.zIndex : distDiff;
+			const hitDiff = b.hitInner - a.hitInner;
+			if (hitDiff !== 0) return hitDiff;
+			if (a.hitInner) return b.piece.zIndex - a.piece.zIndex;
+			return a.dist - b.dist;
 		})[0].piece;
 	}
 	getPieces() {
