@@ -1,5 +1,5 @@
 import {makeLines} from "./generate";
-import {pieceSkinWidth, pieceImageScale} from "../constants";
+import {pieceSkinWidth} from "../constants";
 
 function drawEdge(context, edge, w, h, x, y) {
 	for (const curve of edge) {
@@ -28,19 +28,33 @@ function makeShadow(piece) {
 }
 
 export class Puzzle {
-	constructor(image, columns, rows) {
+	constructor(image, columns, rows, horizontal = null, vertical = null) {
 		this.image = image;
 		this.width = image.width;
 		this.height = image.height;
 
+		// choose scale such that source image is at least 2000px wide
+		// this is primarily to ensure the piece borders are decently smooth
+		this.scale = Math.ceil(2000 / image.width);
 		this.c = columns;
 		this.r = rows;
-		this.w = image.width / columns;
-		this.h = image.height / rows;
 
-		const lines = makeLines(columns, rows);
-		this.horizontal = lines.horizontal;
-		this.vertical = lines.vertical;
+		// try to use whole numbers of pixels
+		const fw = image.width * this.scale;
+		const fh = image.height * this.scale;
+		this.w = Math.floor(fw / columns);
+		this.h = Math.floor(fh / rows);
+		this.rw = fw - (this.w * columns);
+		this.rh = fh - (this.h * rows);
+
+		if (horizontal != null && vertical != null) {
+			this.horizontal = horizontal;
+			this.vertical = vertical;
+		} else {
+			const lines = makeLines(columns, rows);
+			this.horizontal = lines.horizontal;
+			this.vertical = lines.vertical;
+		}
 	}
 	drawFullPuzzle() {
 		const canvas = document.createElement("canvas");
@@ -90,22 +104,23 @@ export class Puzzle {
 		return canvas;
 	}
 	drawPiece(x, y) {
-		const {image, c, r, horizontal, vertical} = this;
-
-		// choose scale such that source image is at least 2000px wide
-		// this is primarily to ensure the piece borders are decently smooth
-		const scale = Math.ceil(2000 / image.width);
-		const w = this.w * scale;
-		const h = this.h * scale;
+		const {image, scale, c, r, w: width, h: height, rw, rh, horizontal, vertical} = this;
+		const skinW = Math.ceil(width * pieceSkinWidth);
+		const skinH = Math.ceil(height * pieceSkinWidth);
 
 		const piece = document.createElement("canvas");
-		piece.width = w * pieceImageScale;
-		piece.height = h * pieceImageScale;
+		piece.width = skinW * 2 + width;
+		piece.height = skinH * 2 + height;
 
-		const left = w * pieceSkinWidth;
-		const right = piece.width - w * pieceSkinWidth;
-		const top = h * pieceSkinWidth;
-		const bottom = piece.height - h * pieceSkinWidth;
+		// for the right-most and bottom-most pieces, add the extra pixels
+		// also, draw each piece a tiny bit oversized to seams render well
+		const w = width + (x === c - 1 ? rw : 0) + 2;
+		const h = height + (y === r - 1 ? rh : 0) + 2;
+
+		const left = skinW - 1;
+		const right = skinW - 1 + w;
+		const top = skinH - 1;
+		const bottom = skinH - 1 + h;
 
 		const context = piece.getContext("2d");
 		context.beginPath();
@@ -151,7 +166,7 @@ export class Puzzle {
 		// paint image into the piece
 		context.globalCompositeOperation = "source-in";
 		context.imageSmoothingEnabled = false;
-		context.drawImage(image, left - (x * w), top - (y * h), image.width * scale, image.height * scale);
+		context.drawImage(image, left - (x * width), top - (y * height), image.width * scale, image.height * scale);
 
 		return [piece, shadow];
 	}
@@ -175,17 +190,7 @@ export class Puzzle {
 		};
 	}
 	static fromSaveFormat(image, save) {
-		const puzzle = Object.create(Puzzle.prototype);
-		puzzle.image = image;
-		puzzle.width = image.width;
-		puzzle.height = image. height;
-		puzzle.c = save.c;
-		puzzle.r = save.r;
-		puzzle.w = image.width / puzzle.c;
-		puzzle.h = image.height / puzzle.r;
-		puzzle.horizontal = save.horizontal;
-		puzzle.vertical = save.vertical;
-		return puzzle;
+		return new Puzzle(image, save.c, save.r, save.horizontal, save.vertical);
 	}
 }
 
