@@ -9,10 +9,12 @@ export function Warning({header, content, confirm, cancel, onConfirm, onCancel})
 		>
 			<div className={styles.warningPopup}>
 				<h2 className={styles.warningHeader}>{header}</h2>
-				<div className={styles.warningContent}>{content}</div>
-				<div>
-					<button className={styles.button} onClick={onConfirm}>{confirm}</button>
-					<button className={styles.button} onClick={onCancel}>{cancel}</button>
+				<div className={styles.warningContent}>
+					{content}
+				</div>
+				<div className={styles.buttonContainer}>
+					<button className={styles.confirm} onClick={onConfirm}>{confirm}</button>
+					<button className={styles.cancel} onClick={onCancel}>{cancel}</button>
 				</div>
 			</div>
 		</div>
