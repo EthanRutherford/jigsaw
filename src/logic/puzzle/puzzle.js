@@ -1,4 +1,5 @@
 import {makeLines} from "./generate";
+import {pieceSkinWidth, pieceImageScale} from "../constants";
 
 function drawEdge(context, edge, w, h, x, y) {
 	for (const curve of edge) {
@@ -98,13 +99,13 @@ export class Puzzle {
 		const h = this.h * scale;
 
 		const piece = document.createElement("canvas");
-		piece.width = w * 1.5;
-		piece.height = h * 1.5;
+		piece.width = w * pieceImageScale;
+		piece.height = h * pieceImageScale;
 
-		const left = w * .25;
-		const right = piece.width - w * .25;
-		const top = h * .25;
-		const bottom = piece.height - h * .25;
+		const left = w * pieceSkinWidth;
+		const right = piece.width - w * pieceSkinWidth;
+		const top = h * pieceSkinWidth;
+		const bottom = piece.height - h * pieceSkinWidth;
 
 		const context = piece.getContext("2d");
 		context.beginPath();
