@@ -24,5 +24,12 @@
 	--carbon: hsl(0, 0%, 12%);
 
 	/* reds */
-	--red-light: hsl(0, 60%, 80%);
+	--pink: hsl(0, 60%, 90%);
+	--pink-dark: hsl(0, 60%, 80%);
+	--red-light: hsl(0, 60%, 60%);
+	--red: hsl(0, 60%, 50%);
+	--red-dark: hsl(0, 60%, 40%);
+
+	/* blues */
+	--baby: hsl(210, 50%, 90%);
 }

@@ -51,7 +51,7 @@
 	bottom: 0;
 	left: 0;
 	right: 0;
-	background-color: rgba(0, 0, 0, .2);
+	background-color: rgba(0, 0, 0, .5);
 	z-index: 1000;
 }
 
@@ -62,28 +62,64 @@
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	box-shadow: 2px 2px 20px 6px rgba(0, 0, 0, .2);
+	box-shadow: 2px 2px 20px 6px rgba(0, 0, 0, .3);
+	border: 2px solid var(--red);
+	border-radius: 5px;
 	width: 600px;
 	max-width: calc(100vw - 20px);
 	background-color: white;
+	overflow: hidden;
 }
 
 .warning__warning-header--T7rqO {
 	padding: 20px;
-	background-color: var(--red-light);
+	background-color: var(--pink);
 	font-size: 30px;
 }
 
 .warning__warning-content--2z0Pd {
-	padding: 20px;
+	margin: 20px;
 }
 
-.warning__button--1Llmk {
-	border: 1px solid black;
+.warning__button-container--1smrG {
+	display: flex;
+	justify-content: space-around;
+	margin: 20px;
+}
+
+.warning__confirm--H-Xhi {
+	border: 2px solid var(--red);
+	border-radius: 5px;
 	padding: 10px;
-	height: 50px;
-	width: 100%;
-	text-align: center;
+	width: 100px;
+	background: var(--pink);
+	color: var(--red);
+}
+.warning__confirm--H-Xhi:hover {
+	border-color: var(--red-light);
+	color: var(--red-light);
+}
+.warning__confirm--H-Xhi:active {
+	border-color: var(--red-dark);
+	background: var(--pink-dark);
+	color: var(--red-dark);
+}
+
+.warning__cancel--W-P3W {
+	border: 2px solid var(--carbon);
+	border-radius: 5px;
+	padding: 10px;
+	width: 100px;
+	background: var(--white);
+}
+.warning__cancel--W-P3W:hover {
+	border-color: var(--slate-light);
+	color: var(--slate-light);
+}
+.warning__cancel--W-P3W:active {
+	border-color: black;
+	background: var(--not-white);
+	color: black;
 }
 
 .menu__menu--3rdlY {
@@ -101,7 +137,7 @@
 .menu__saved-game--XA_En {
 	display: flex;
 	align-items: center;
-	border: 1px solid black;
+	border: 2px solid var(--carbon);
 	border-radius: 5px;
 	width: 300px;
 	height: 100px;
@@ -109,7 +145,7 @@
 	background: white;
 }
 .menu__image-button--2VBCz {
-	border: 1px solid black;
+	border: 2px solid var(--carbon);
 	border-radius: 5px;
 	width: 100px;
 	height: 100px;
@@ -123,18 +159,28 @@
 }
 
 .menu__delete-button--13l_b {
-	border: 1px solid black;
+	border: 2px solid var(--red);
 	border-radius: 5px;
 	margin-left: 10px;
 	padding: 10px;
 	width: 100px;
-	background: white;
+	background: var(--pink);
+	color: var(--red);
+}
+.menu__delete-button--13l_b:hover {
+	border-color: var(--red-light);
+	color: var(--red-light);
+}
+.menu__delete-button--13l_b:active {
+	border-color: var(--red-dark);
+	background: var(--pink-dark);
+	color: var(--red-dark);
 }
 
 .menu__new-game--l881T {
 	display: flex;
 	justify-content: center;
-	border: 1px solid black;
+	border: 2px solid var(--carbon);
 	border-radius: 5px;
 	padding: 10px;
 	width: 410px;
@@ -144,7 +190,7 @@
 .menu__add-to-homescreen--1eYum {
 	display: flex;
 	justify-content: center;
-	border: 1px solid black;
+	border: 2px solid var(--carbon);
 	border-radius: 5px;
 	margin-top: 20px;
 	padding: 10px;
@@ -175,7 +221,7 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	border: 5px dashed grey;
+	border: 5px dashed var(--grey);
 	border-radius: 5px;
 	width: 100%;
 	height: 100%;
@@ -183,7 +229,7 @@
 	z-index: 1;
 }
 .menu__paste-area--3UzO1 {
-	border: 1px solid black;
+	border: 2px solid var(--carbon);
 	border-radius: 5px;
 	margin-bottom: 10px;
 	padding: 10px;
@@ -196,7 +242,7 @@
 	height: min-content;
 }
 .menu__upload-button--1n831 {
-	border: 1px solid black;
+	border: 2px solid var(--carbon);
 	border-radius: 5px;
 	padding: 10px;
 	width: 100%;
@@ -214,18 +260,41 @@
 }
 
 .menu__input--3aNgg {
-	border: 1px solid black;
+	border: 2px solid var(--carbon);
 	border-radius: 5px;
 	padding: 0 10px;
 	width: 100px;
 }
 
 .menu__accept--2eLjd {
-	border: 1px solid black;
+	border: 2px solid var(--carbon);
 	border-radius: 5px;
+	padding: 10px;
 	width: 200px;
 	background: white;
 }
+
+/* shared button pseudo styles */
+.menu__saved-game--XA_En:hover,
+.menu__image-button--2VBCz:hover,
+.menu__new-game--l881T:hover,
+.menu__add-to-homescreen--1eYum:hover,
+.menu__upload-button--1n831:hover,
+.menu__accept--2eLjd:hover {
+	border-color: var(--slate-light);
+	color: var(--slate-light);
+}
+.menu__saved-game--XA_En:active,
+.menu__image-button--2VBCz:active,
+.menu__new-game--l881T:active,
+.menu__add-to-homescreen--1eYum:active,
+.menu__upload-button--1n831:active,
+.menu__accept--2eLjd:active {
+	border-color: black;
+	background: var(--baby);
+	color: black;
+}
+
 
 :root {
 	/* font-sizes */
@@ -253,7 +322,14 @@
 	--carbon: hsl(0, 0%, 12%);
 
 	/* reds */
-	--red-light: hsl(0, 60%, 80%);
+	--pink: hsl(0, 60%, 90%);
+	--pink-dark: hsl(0, 60%, 80%);
+	--red-light: hsl(0, 60%, 60%);
+	--red: hsl(0, 60%, 50%);
+	--red-dark: hsl(0, 60%, 40%);
+
+	/* blues */
+	--baby: hsl(210, 50%, 90%);
 }
 
 html, body, div, span, p, a, img,

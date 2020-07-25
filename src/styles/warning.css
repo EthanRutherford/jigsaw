@@ -4,7 +4,7 @@
 	bottom: 0;
 	left: 0;
 	right: 0;
-	background-color: rgba(0, 0, 0, .2);
+	background-color: rgba(0, 0, 0, .5);
 	z-index: 1000;
 }
 
@@ -15,26 +15,62 @@
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	box-shadow: 2px 2px 20px 6px rgba(0, 0, 0, .2);
+	box-shadow: 2px 2px 20px 6px rgba(0, 0, 0, .3);
+	border: 2px solid var(--red);
+	border-radius: 5px;
 	width: 600px;
 	max-width: calc(100vw - 20px);
 	background-color: white;
+	overflow: hidden;
 }
 
 .warning-header {
 	padding: 20px;
-	background-color: var(--red-light);
+	background-color: var(--pink);
 	font-size: 30px;
 }
 
 .warning-content {
-	padding: 20px;
+	margin: 20px;
 }
 
-.button {
-	border: 1px solid black;
+.button-container {
+	display: flex;
+	justify-content: space-around;
+	margin: 20px;
+}
+
+.confirm {
+	border: 2px solid var(--red);
+	border-radius: 5px;
 	padding: 10px;
-	height: 50px;
-	width: 100%;
-	text-align: center;
+	width: 100px;
+	background: var(--pink);
+	color: var(--red);
+}
+.confirm:hover {
+	border-color: var(--red-light);
+	color: var(--red-light);
+}
+.confirm:active {
+	border-color: var(--red-dark);
+	background: var(--pink-dark);
+	color: var(--red-dark);
+}
+
+.cancel {
+	border: 2px solid var(--carbon);
+	border-radius: 5px;
+	padding: 10px;
+	width: 100px;
+	background: var(--white);
+}
+.cancel:hover {
+	border-color: var(--slate-light);
+	color: var(--slate-light);
+}
+.cancel:active {
+	border-color: black;
+	background: var(--not-white);
+	color: black;
 }

@@ -13,7 +13,7 @@
 .saved-game {
 	display: flex;
 	align-items: center;
-	border: 1px solid black;
+	border: 2px solid var(--carbon);
 	border-radius: 5px;
 	width: 300px;
 	height: 100px;
@@ -21,7 +21,7 @@
 	background: white;
 }
 .image-button {
-	border: 1px solid black;
+	border: 2px solid var(--carbon);
 	border-radius: 5px;
 	width: 100px;
 	height: 100px;
@@ -35,18 +35,28 @@
 }
 
 .delete-button {
-	border: 1px solid black;
+	border: 2px solid var(--red);
 	border-radius: 5px;
 	margin-left: 10px;
 	padding: 10px;
 	width: 100px;
-	background: white;
+	background: var(--pink);
+	color: var(--red);
+}
+.delete-button:hover {
+	border-color: var(--red-light);
+	color: var(--red-light);
+}
+.delete-button:active {
+	border-color: var(--red-dark);
+	background: var(--pink-dark);
+	color: var(--red-dark);
 }
 
 .new-game {
 	display: flex;
 	justify-content: center;
-	border: 1px solid black;
+	border: 2px solid var(--carbon);
 	border-radius: 5px;
 	padding: 10px;
 	width: 410px;
@@ -56,7 +66,7 @@
 .add-to-homescreen {
 	display: flex;
 	justify-content: center;
-	border: 1px solid black;
+	border: 2px solid var(--carbon);
 	border-radius: 5px;
 	margin-top: 20px;
 	padding: 10px;
@@ -87,7 +97,7 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	border: 5px dashed grey;
+	border: 5px dashed var(--grey);
 	border-radius: 5px;
 	width: 100%;
 	height: 100%;
@@ -95,7 +105,7 @@
 	z-index: 1;
 }
 .paste-area {
-	border: 1px solid black;
+	border: 2px solid var(--carbon);
 	border-radius: 5px;
 	margin-bottom: 10px;
 	padding: 10px;
@@ -108,7 +118,7 @@
 	height: min-content;
 }
 .upload-button {
-	border: 1px solid black;
+	border: 2px solid var(--carbon);
 	border-radius: 5px;
 	padding: 10px;
 	width: 100%;
@@ -126,15 +136,38 @@
 }
 
 .input {
-	border: 1px solid black;
+	border: 2px solid var(--carbon);
 	border-radius: 5px;
 	padding: 0 10px;
 	width: 100px;
 }
 
 .accept {
-	border: 1px solid black;
+	border: 2px solid var(--carbon);
 	border-radius: 5px;
+	padding: 10px;
 	width: 200px;
 	background: white;
 }
+
+/* shared button pseudo styles */
+.saved-game:hover,
+.image-button:hover,
+.new-game:hover,
+.add-to-homescreen:hover,
+.upload-button:hover,
+.accept:hover {
+	border-color: var(--slate-light);
+	color: var(--slate-light);
+}
+.saved-game:active,
+.image-button:active,
+.new-game:active,
+.add-to-homescreen:active,
+.upload-button:active,
+.accept:active {
+	border-color: black;
+	background: var(--baby);
+	color: black;
+}
+
