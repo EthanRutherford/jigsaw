@@ -113,7 +113,7 @@ export class Puzzle {
 		piece.height = skinH * 2 + height;
 
 		// for the right-most and bottom-most pieces, add the extra pixels
-		// also, draw each piece a tiny bit oversized to seams render well
+		// also, draw each piece a tiny bit oversized to help seams render well
 		const w = width + (x === c - 1 ? rw : 0) + 2;
 		const h = height + (y === r - 1 ? rh : 0) + 2;
 
