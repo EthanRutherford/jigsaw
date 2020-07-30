@@ -1,32 +1,54 @@
-import React, {useState, useEffect, useRef} from "react";
+import React, {useState, useRef} from "react";
 import {getGameList, blobToImage, getImageList, storePuzzle, storeImage, deleteGame, deleteImage, getGamesUsingImageCount} from "../logic/jigsaw-db";
 import {Puzzle} from "../logic/puzzle/puzzle";
 import {PuzzleGame} from "../logic/game";
+import {notifyCanPrompt, promptForInstall} from "../pwa/install-prompt";
+import {useAsyncEffect} from "../hooks/use-async-effect";
+import {LoadSpinner} from "./load-spinner";
 import {Warning} from "./warning";
 import styles from "../styles/menu.css";
-import {notifyCanPrompt, promptForInstall} from "../pwa/install-prompt";
 
 function GameSnapshot({game}) {
+	const [isLoading, setIsLoading] = useState(true);
 	const canvas = useRef();
-	useEffect(() => {
-		(async () => {
-			const image = await blobToImage(game.image);
+	useAsyncEffect(async (getIsCancelled) => {
+		const image = await blobToImage(game.image);
+		if (getIsCancelled()) {
+			return null;
+		}
 
-			const puzzle = Puzzle.fromSaveFormat(image, game.puzzle);
-			const preview = new PuzzleGame(null, puzzle, game.pieces, canvas.current);
-			preview.render();
-		})();
+		const puzzle = Puzzle.fromSaveFormat(image, game.puzzle);
+		const pieces = await puzzle.drawPieces();
+		if (getIsCancelled()) {
+			return null;
+		}
+
+		const preview = new PuzzleGame(null, puzzle, pieces, game.pieces, canvas.current);
+		setIsLoading(false);
+		preview.render();
+
+		return () => preview.cleanup();
 	}, []);
 
-	return <canvas className={styles.snapshot} ref={canvas} />;
+	return (
+		<div className={styles.snapshotContainer}>
+			<canvas className={styles.snapshot} ref={canvas} />
+			{isLoading && <LoadSpinner />}
+		</div>
+	);
 }
 
 function SaveGamePicker({startGame, newGame}) {
 	const [canPrompt, setCanPrompt] = useState();
 	const [gameList, setGameList] = useState();
 	const [deleteState, setDeleteState] = useState();
-	useEffect(() => {
-		getGameList().then(setGameList);
+	useAsyncEffect(async (getIsCancelled) => {
+		const list = await getGameList();
+		if (getIsCancelled()) {
+			return null;
+		}
+
+		setGameList(list);
 		notifyCanPrompt(() => setCanPrompt(true));
 		return () => notifyCanPrompt(null);
 	}, []);
@@ -59,7 +81,7 @@ function SaveGamePicker({startGame, newGame}) {
 									puzzleId: game.value.puzzleId,
 								},
 								puzzle: Puzzle.fromSaveFormat(image, game.value.puzzle),
-								pieces: game.value.pieces,
+								savedPieces: game.value.pieces,
 							});
 						}}
 					>
@@ -120,8 +142,13 @@ function ImagePicker({setImage}) {
 	const [imageList, setImageList] = useState([]);
 	const [deleteState, setDeleteState] = useState();
 	const [isDragging, setIsDragging] = useState(false);
-	useEffect(() => {
-		getImageList().then(setImageList);
+	useAsyncEffect(async (getIsCancelled) => {
+		const list = await getImageList();
+		if (getIsCancelled()) {
+			return;
+		}
+
+		setImageList(list);
 	}, []);
 
 	return (
@@ -344,7 +371,7 @@ function PuzzlePicker({gameId, image, startGame}) {
 					startGame({
 						ids: {gameId, imageId: image.id, puzzleId},
 						puzzle,
-						pieces: [],
+						savedPieces: [],
 					});
 				}}
 			>

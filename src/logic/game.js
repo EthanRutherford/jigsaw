@@ -6,7 +6,7 @@ import {randFloat, randInt, randChance} from "./random";
 const {OrthoCamera} = builtIn;
 
 export class PuzzleGame {
-	constructor(ids, puzzle, savedPieces, canvas) {
+	constructor(ids, puzzle, pieces, savedPieces, canvas) {
 		this.ids = ids;
 		this.bvh = new BVH();
 
@@ -28,7 +28,7 @@ export class PuzzleGame {
 		for (let i = 0; i < puzzle.c; i++) {
 			for (let j = 0; j < puzzle.r; j++) {
 				const id = i * puzzle.r + j;
-				const images = puzzle.drawPiece(i, j);
+				const images = pieces[id];
 
 				const piece = new Piece(id, i, j, this.renderer, images, puzzle.w, puzzle.h);
 
@@ -214,6 +214,9 @@ export class PuzzleGame {
 	stopLoop() {
 		cancelAnimationFrame(this.animId);
 		this.animId = null;
+	}
+	cleanup() {
+		this.renderer.gl.getExtension("WEBGL_lose_context").loseContext();
 	}
 	render() {
 		this.renderer.render(this.camera, this.scene);

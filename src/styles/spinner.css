@@ -1,0 +1,28 @@
+.spinner {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 100px;
+	animation-name: spin;
+	animation-duration: 1.2s;
+	animation-iteration-count: infinite;
+}
+
+@keyframes spin {
+	0% {
+		transform: translate(-50%, -50%) rotate(0deg);
+		animation-timing-function: linear;
+	}
+	30% {
+		transform: translate(-50%, -50%) rotate(10deg);
+		animation-timing-function: ease-in-out;
+	}
+	70% {
+		transform: translate(-50%, -50%) rotate(350deg);
+		animation-timing-function: linear;
+	}
+	100% {
+		transform: translate(-50%, -50%) rotate(360deg);
+		animation-timing-function: linear;
+	}
+}

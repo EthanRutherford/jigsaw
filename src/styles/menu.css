@@ -75,6 +75,11 @@
 	background: white;
 }
 
+.snapshot-container {
+	position: relative;
+	width: min-content;
+	color: var(--carbon);
+}
 .snapshot {
 	width: 100px;
 	height: 100px;
