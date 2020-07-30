@@ -84,6 +84,13 @@ function makeVerticalLine(length) {
 	return vertical;
 }
 
+export function reverseEdge(edge, fx, fy) {
+	return edge.map((c, i) => {
+		const to = i === 0 ? {x: fx, y: fy} : edge[i - 1].to;
+		return {c0: c.c1, c1: c.c0, to};
+	}).reverse();
+}
+
 export function makeLines(width, height) {
 	const horizontal = [];
 	const vertical = [];

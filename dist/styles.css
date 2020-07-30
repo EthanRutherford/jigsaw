@@ -14,10 +14,40 @@
 	height: 100%;
 }
 
+.spinner__spinner--1vP1Q {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 100px;
+	animation-name: spinner__spin--d2HjJ;
+	animation-duration: 1.2s;
+	animation-iteration-count: infinite;
+}
+
+@keyframes spinner__spin--d2HjJ {
+	0% {
+		transform: translate(-50%, -50%) rotate(0deg);
+		animation-timing-function: linear;
+	}
+	30% {
+		transform: translate(-50%, -50%) rotate(10deg);
+		animation-timing-function: ease-in-out;
+	}
+	70% {
+		transform: translate(-50%, -50%) rotate(350deg);
+		animation-timing-function: linear;
+	}
+	100% {
+		transform: translate(-50%, -50%) rotate(360deg);
+		animation-timing-function: linear;
+	}
+}
+
 .game__container--28rCx {
 	position: relative;
 	width: 100%;
 	height: calc(100vh - var(--header-height));
+	color: var(--carbon);
 	overflow: hidden;
 }
 
@@ -199,6 +229,11 @@
 	background: white;
 }
 
+.menu__snapshot-container--CrtlU {
+	position: relative;
+	width: min-content;
+	color: var(--carbon);
+}
 .menu__snapshot--2fS0c {
 	width: 100px;
 	height: 100px;

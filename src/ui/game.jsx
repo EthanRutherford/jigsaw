@@ -1,13 +1,17 @@
-import React, {useRef, useEffect, useState} from "react";
+import React, {useRef, useState} from "react";
 import {PuzzleGame} from "../logic/game";
+import {useAsyncEffect} from "../hooks/use-async-effect";
 import {mouseZoomPan} from "./controls/mouse";
 import {setupPointerControls} from "./controls/pointer";
+import {LoadSpinner} from "./load-spinner";
 import styles from "../styles/game.css";
 
-function useGame(ids, puzzle, pieces) {
+function useGame(ids, puzzle, savedPieces) {
+	const [isLoading, setIsLoading] = useState(true);
 	const canvas = useRef();
-	useEffect(() => {
-		const game = new PuzzleGame(ids, puzzle, pieces, canvas.current);
+	useAsyncEffect(async () => {
+		const pieces = await puzzle.drawPieces();
+		const game = new PuzzleGame(ids, puzzle, pieces, savedPieces, canvas.current);
 
 		canvas.current.addEventListener("wheel", (event) => {
 			event.preventDefault();
@@ -16,15 +20,16 @@ function useGame(ids, puzzle, pieces) {
 
 		setupPointerControls(game, canvas.current);
 
+		setIsLoading(false);
 		game.animLoop();
 		return () => game.stopLoop();
 	}, []);
 
-	return canvas;
+	return [canvas, isLoading];
 }
 
-export function Game({ids, puzzle, pieces}) {
-	const canvas = useGame(ids, puzzle, pieces);
+export function Game({ids, puzzle, savedPieces}) {
+	const [canvas, isLoading] = useGame(ids, puzzle, savedPieces);
 	const [isPreviewing, setIsPreviewing] = useState();
 
 	return (
@@ -38,6 +43,7 @@ export function Game({ids, puzzle, pieces}) {
 				src={puzzle.image.src}
 				onClick={() => setIsPreviewing((i) => !i)}
 			/>
+			{isLoading && <LoadSpinner />}
 		</div>
 	);
 }
