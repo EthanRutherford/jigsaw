@@ -82,4 +82,3 @@ export class Puzzle {
 		return new Puzzle(image, save.c, save.r, save.horizontal, save.vertical);
 	}
 }
-
