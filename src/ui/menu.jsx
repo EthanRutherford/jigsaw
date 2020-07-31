@@ -1,5 +1,14 @@
 import React, {useState, useRef} from "react";
-import {getGameList, blobToImage, getImageList, storePuzzle, storeImage, deleteGame, deleteImage, getGamesUsingImageCount} from "../logic/jigsaw-db";
+import {
+	getGameList,
+	blobToImage,
+	getImageList,
+	storePuzzle,
+	storeImage,
+	deleteGame,
+	deleteImage,
+	getGamesUsingImageCount,
+} from "../logic/jigsaw-db";
 import {Puzzle} from "../logic/puzzle/puzzle";
 import {PuzzleGame} from "../logic/game";
 import {notifyCanPrompt, promptForInstall} from "../pwa/install-prompt";
@@ -137,6 +146,7 @@ export function SaveGamePicker({startGame, newGame}) {
 }
 
 const artHref = "https://www.creativebloq.com/features/how-to-break-into-pixel-art";
+const linkProps = {target: "_blank", rel: "noopener"};
 export function ImagePicker({setImage}) {
 	const fileInput = useRef();
 	const [imageList, setImageList] = useState([]);
@@ -154,8 +164,8 @@ export function ImagePicker({setImage}) {
 	return (
 		<div className={styles.menu}>
 			<div className={styles.hint}>
-				Need some inspiration? Check <a href={artHref}>here</a> for some
-				pixel art that makes for excellent puzzles!
+				Need some inspiration? Check <a href={artHref} {...linkProps}>here</a> for
+				some pixel art that makes for excellent puzzles!
 			</div>
 			{imageList.map((image) => (
 				<div className={styles.saveWrapper} key={image.id}>
