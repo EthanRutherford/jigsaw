@@ -38,7 +38,7 @@ function GameSnapshot({game}) {
 	);
 }
 
-function SaveGamePicker({startGame, newGame}) {
+export function SaveGamePicker({startGame, newGame}) {
 	const [canPrompt, setCanPrompt] = useState();
 	const [gameList, setGameList] = useState();
 	const [deleteState, setDeleteState] = useState();
@@ -67,7 +67,7 @@ function SaveGamePicker({startGame, newGame}) {
 	}
 
 	return (
-		<div>
+		<div className={styles.menu}>
 			{gameList.map((game) => (
 				<div className={styles.saveWrapper} key={game.id}>
 					<button
@@ -137,7 +137,7 @@ function SaveGamePicker({startGame, newGame}) {
 }
 
 const artHref = "https://www.creativebloq.com/features/how-to-break-into-pixel-art";
-function ImagePicker({setImage}) {
+export function ImagePicker({setImage}) {
 	const fileInput = useRef();
 	const [imageList, setImageList] = useState([]);
 	const [deleteState, setDeleteState] = useState();
@@ -152,7 +152,7 @@ function ImagePicker({setImage}) {
 	}, []);
 
 	return (
-		<div>
+		<div className={styles.menu}>
 			<div className={styles.hint}>
 				Need some inspiration? Check <a href={artHref}>here</a> for some
 				pixel art that makes for excellent puzzles!
@@ -304,14 +304,14 @@ function boundRows(w, h, c, r) {
 	return r;
 }
 
-function PuzzlePicker({gameId, image, startGame}) {
+export function PuzzlePicker({gameId, image, startGame}) {
 	const w = image.value.width;
 	const h = image.value.height;
 	const [columns, setColumns] = useState(20);
 	const [rows, setRows] = useState(boundRows(w, h, 20, 10));
 
 	return (
-		<div>
+		<div className={styles.menu}>
 			<label className={styles.label}>
 				Columns
 				<input
@@ -377,23 +377,6 @@ function PuzzlePicker({gameId, image, startGame}) {
 			>
 				Start game
 			</button>
-		</div>
-	);
-}
-
-export function Menu({startGame}) {
-	const [gameId, setGameId] = useState();
-	const [image, setImage] = useState();
-
-	return (
-		<div className={styles.menu}>
-			{gameId == null ? (
-				<SaveGamePicker startGame={startGame} newGame={setGameId} />
-			) : image == null ? (
-				<ImagePicker setImage={setImage} />
-			) : (
-				<PuzzlePicker gameId={gameId} image={image} startGame={startGame} />
-			)}
 		</div>
 	);
 }
