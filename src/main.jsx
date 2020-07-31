@@ -1,5 +1,5 @@
 import {render} from "react-dom";
-import React, {useState} from "react";
+import React, {useState, useEffect, useMemo} from "react";
 import {Header} from "./ui/header";
 import {Game} from "./ui/game";
 import {SaveGamePicker, ImagePicker, PuzzlePicker} from "./ui/menu";
@@ -12,22 +12,76 @@ if ("serviceWorker" in navigator) {
 	}, {once: true});
 }
 
+function useCustomHistory() {
+	const stack = useMemo(() => [{page: "home"}], []);
+	const [, toggle] = useState();
+
+	useEffect(() => {
+		// initialize or restore proper state
+		if (history.state == null) {
+			history.replaceState({home: true}, null, "/");
+		} else if (!history.state.home) {
+			history.back();
+		}
+
+		window.onpopstate = () => {
+			if (history.state == null || !history.state.home) {
+				// the user got here by some odd transition
+				// go back to the home page
+				history.back();
+			} else if (stack.length > 1) {
+				// pop off an entry from the stack
+				stack.pop();
+				toggle((t) => !t);
+
+				// if we're not all the way back home, push non-home state
+				if (stack.length > 1) {
+					history.pushState({home: false}, null, "/");
+				}
+			}
+		};
+	}, []);
+
+	const pushState = (state) => {
+		if (history.state.home) {
+			history.pushState({home: false}, null, "/");
+		}
+
+		stack.push(state);
+		toggle((t) => !t);
+	};
+
+	return [stack[stack.length - 1], pushState];
+}
+
 function App() {
-	const [gameData, setGameData] = useState();
-	const [image, setImage] = useState();
-	const [gameId, setGameId] = useState();
+	const [state, pushState] = useCustomHistory();
+
+	const startGame = (gameData) => {
+		pushState({gameData, page: "game"});
+	};
+
+	const newGame = (gameId) => {
+		pushState({gameId, page: "image"});
+	};
+
+	const pickImage = (image) => {
+		pushState({gameId: state.gameId, image, page: "puzzle"});
+	};
 
 	return (
 		<div className={styles.app}>
 			<Header />
-			{gameData != null ? (
-				<Game {...gameData} />
-			) : image != null ? (
-				<PuzzlePicker gameId={gameId} image={image} startGame={setGameData} />
-			) : gameId != null ? (
-				<ImagePicker setImage={setImage} />
+			{state.page === "home" ? (
+				<SaveGamePicker startGame={startGame} newGame={newGame} />
+			) : state.page === "image" ? (
+				<ImagePicker setImage={pickImage} />
+			) : state.page === "puzzle" ? (
+				<PuzzlePicker gameId={state.gameId} image={state.image} startGame={startGame} />
+			) : state.page === "game" ? (
+				<Game {...state.gameData} />
 			) : (
-				<SaveGamePicker startGame={setGameData} newGame={setGameId} />
+				<div>this shouldn't happen :(</div>
 			)}
 		</div>
 	);
