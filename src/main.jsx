@@ -2,7 +2,7 @@ import {render} from "react-dom";
 import React, {useState} from "react";
 import {Header} from "./ui/header";
 import {Game} from "./ui/game";
-import {Menu} from "./ui/menu";
+import {SaveGamePicker, ImagePicker, PuzzlePicker} from "./ui/menu";
 import styles from "./styles/root.css";
 
 // register service worker
@@ -14,14 +14,20 @@ if ("serviceWorker" in navigator) {
 
 function App() {
 	const [gameData, setGameData] = useState();
+	const [image, setImage] = useState();
+	const [gameId, setGameId] = useState();
 
 	return (
 		<div className={styles.app}>
 			<Header />
-			{gameData == null ? (
-				<Menu startGame={setGameData} />
-			) : (
+			{gameData != null ? (
 				<Game {...gameData} />
+			) : image != null ? (
+				<PuzzlePicker gameId={gameId} image={image} startGame={setGameData} />
+			) : gameId != null ? (
+				<ImagePicker setImage={setImage} />
+			) : (
+				<SaveGamePicker startGame={setGameData} newGame={setGameId} />
 			)}
 		</div>
 	);
