@@ -22,7 +22,10 @@ function useGame(ids, puzzle, savedPieces) {
 
 		setIsLoading(false);
 		game.animLoop();
-		return () => game.stopLoop();
+		return () => {
+			game.stopLoop();
+			game.cleanup();
+		};
 	}, []);
 
 	return [canvas, isLoading];
