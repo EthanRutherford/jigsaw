@@ -56,7 +56,10 @@ export class Puzzle {
 				image, canvases: offscreens, horizontal, vertical, width, height, scale, c, r, rw, rh,
 			}, offscreens.flat());
 
-			worker.onmessage = () => resolve(canvases);
+			worker.onmessage = () => {
+				worker.terminate();
+				resolve(canvases);
+			};
 		});
 	}
 	static fetchImage(url) {

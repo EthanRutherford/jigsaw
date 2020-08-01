@@ -216,7 +216,11 @@ export class PuzzleGame {
 		this.animId = null;
 	}
 	cleanup() {
-		this.renderer.gl.getExtension("WEBGL_lose_context").loseContext();
+		for (const piece of this.pieces) {
+			piece.free();
+		}
+
+		this.renderer.free();
 	}
 	render() {
 		this.renderer.render(this.camera, this.scene);

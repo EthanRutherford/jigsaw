@@ -72,6 +72,13 @@ export class Piece {
 			shadow.zIndex = this.renderable.zIndex - 1;
 			return [shadow];
 		};
+
+		// add free method
+		this.free = () => {
+			shape.free();
+			shadowMaterial.free();
+			pieceMaterial.free();
+		};
 	}
 	get x() {return this.renderable.x;}
 	set x(v) {return this.renderable.x = v;}
