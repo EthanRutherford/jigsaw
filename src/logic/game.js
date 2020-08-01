@@ -54,6 +54,10 @@ export class PuzzleGame {
 				} else {
 					groups.push(piece.group);
 				}
+
+				// center the camera
+				this.camera.x += piece.x / this.pieces.length;
+				this.camera.y += piece.y / this.pieces.length;
 			} else {
 				// place pieces in random positions around a puzzle-sized hole
 				const w = puzzle.c + 1;
