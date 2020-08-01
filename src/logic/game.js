@@ -56,9 +56,9 @@ export class PuzzleGame {
 				}
 			} else {
 				// place pieces in random positions around a puzzle-sized hole
-				const w = puzzle.c;
+				const w = puzzle.c + 1;
 				const hw = w / 2;
-				const h = puzzle.r;
+				const h = puzzle.r + 1;
 				const hh = h / 2;
 				if (randChance(.5)) {
 					piece.x = randFloat(-w, w);
