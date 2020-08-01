@@ -51,11 +51,19 @@ function useCustomHistory() {
 		toggle((t) => !t);
 	};
 
-	return [stack[stack.length - 1], pushState];
+	const goHome = () => {
+		if (stack.length > 1) {
+			stack.splice(1, Infinity);
+			history.back();
+			toggle((t) => !t);
+		}
+	};
+
+	return [stack[stack.length - 1], pushState, goHome];
 }
 
 function App() {
-	const [state, pushState] = useCustomHistory();
+	const [state, pushState, goHome] = useCustomHistory();
 
 	const startGame = (gameData) => {
 		pushState({gameData, page: "game"});
@@ -71,7 +79,7 @@ function App() {
 
 	return (
 		<div className={styles.app}>
-			<Header />
+			<Header goHome={goHome} />
 			{state.page === "home" ? (
 				<SaveGamePicker startGame={startGame} newGame={newGame} />
 			) : state.page === "image" ? (

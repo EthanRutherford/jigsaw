@@ -14,6 +14,11 @@
 	height: 100%;
 }
 
+.header__home-link--sAY0g {
+	color: var(--carbon);
+	text-decoration: none;
+}
+
 .spinner__spinner--1vP1Q {
 	position: absolute;
 	top: 50%;

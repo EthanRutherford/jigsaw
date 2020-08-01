@@ -12,3 +12,8 @@
 	max-width: var(--content-max-width);
 	height: 100%;
 }
+
+.home-link {
+	color: var(--carbon);
+	text-decoration: none;
+}
