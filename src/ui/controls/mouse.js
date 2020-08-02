@@ -1,3 +1,8 @@
+import {loadSettings, addSettingsListener} from "../../logic/settings";
+
+let panScale = loadSettings().panScale;
+addSettingsListener((settings) => panScale = settings.panScale);
+
 export function mouseZoomPan(game, event) {
 	// attempt to normalize wheel event data; some bits borrowed from
 	// https://gist.github.com/akella/11574989a9f3cc9e0ad47e401c12ccaf
@@ -17,6 +22,11 @@ export function mouseZoomPan(game, event) {
 		dx = dy;
 		dy = 0;
 	}
+
+	// as a last resort, since zoom speeds are unpredictable, allow user to
+	// manually adjust zoom/pan speeds
+	dx *= panScale;
+	dy *= panScale;
 
 	// zoom/pan logic
 	if (event.ctrlKey) {

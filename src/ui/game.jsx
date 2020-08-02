@@ -1,5 +1,6 @@
 import React, {useRef, useState} from "react";
 import {PuzzleGame} from "../logic/game";
+import {loadSettings, addSettingsListener, removeSettingsListener} from "../logic/settings";
 import {useAsyncEffect} from "../hooks/use-async-effect";
 import {mouseZoomPan} from "./controls/mouse";
 import {setupPointerControls} from "./controls/pointer";
@@ -12,6 +13,7 @@ function useGame(ids, puzzle, savedPieces) {
 	useAsyncEffect(async () => {
 		const pieces = await puzzle.drawPieces();
 		const game = new PuzzleGame(ids, puzzle, pieces, savedPieces, canvas.current);
+		game.setBgColor(loadSettings().bgColor);
 
 		canvas.current.addEventListener("wheel", (event) => {
 			event.preventDefault();
@@ -22,9 +24,16 @@ function useGame(ids, puzzle, savedPieces) {
 
 		setIsLoading(false);
 		game.animLoop();
+
+		const listenForColorChanges = (settings) => {
+			game.setBgColor(settings.bgColor);
+		};
+
+		addSettingsListener(listenForColorChanges);
 		return () => {
 			game.stopLoop();
 			game.cleanup();
+			removeSettingsListener(listenForColorChanges);
 		};
 	}, []);
 

@@ -27,7 +27,7 @@
 .warning-header {
 	padding: 20px;
 	background-color: var(--pink);
-	font-size: 30px;
+	font-size: var(--huge);
 }
 
 .warning-content {

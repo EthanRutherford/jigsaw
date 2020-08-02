@@ -6,6 +6,7 @@
 
 .header {
 	display: flex;
+	justify-content: space-between;
 	align-items: center;
 	margin: auto;
 	width: var(--content-width);
@@ -16,4 +17,22 @@
 .home-link {
 	color: var(--carbon);
 	text-decoration: none;
+}
+
+.settings-button {
+	cursor: pointer;
+	border-radius: 50%;
+	color: var(--carbon);
+}
+.settings-button:hover {
+	color: var(--slate-light);
+}
+.settings-button:active {
+	background: var(--baby);
+	color: black;
+}
+
+.settings-icon {
+	display: block;
+	width: 25px;
 }
