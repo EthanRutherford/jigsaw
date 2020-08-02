@@ -39,7 +39,7 @@ export function SettingsPopup({close}) {
 	};
 
 	return (
-		<div className={styles.overlay} onClick={overlayClick}>
+		<div className={styles.overlay} onMouseDown={overlayClick}>
 			<div className={styles.popup}>
 				<h1 className={styles.header}>Settings</h1>
 				<h2 className={styles.subHeader}>Background color</h2>
