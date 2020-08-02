@@ -103,6 +103,9 @@ export class PuzzleGame {
 	setZoom(zoom) {
 		this.camera.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, zoom));
 	}
+	setBgColor(c) {
+		this.scene.bgColor = rgba(c.r / 255, c.g / 255, c.b / 255);
+	}
 	grabPieces(rootPiece) {
 		for (const piece of rootPiece.group.pieces) {
 			piece.grabbed = true;

@@ -11,6 +11,7 @@ import {
 } from "../logic/jigsaw-db";
 import {Puzzle} from "../logic/puzzle/puzzle";
 import {PuzzleGame} from "../logic/game";
+import {removeSettingsListener, addSettingsListener, loadSettings} from "../logic/settings";
 import {notifyCanPrompt, promptForInstall} from "../pwa/install-prompt";
 import {useAsyncEffect} from "../hooks/use-async-effect";
 import {LoadSpinner} from "./load-spinner";
@@ -33,10 +34,20 @@ function GameSnapshot({game}) {
 		}
 
 		const preview = new PuzzleGame(null, puzzle, pieces, game.pieces, canvas.current);
+		preview.setBgColor(loadSettings().bgColor);
 		setIsLoading(false);
 		preview.render();
 
-		return () => preview.cleanup();
+		const listenForColorChanges = (settings) => {
+			preview.setBgColor(settings.bgColor);
+			preview.render();
+		};
+
+		addSettingsListener(listenForColorChanges);
+		return () => {
+			preview.cleanup();
+			removeSettingsListener(listenForColorChanges);
+		};
 	}, []);
 
 	return (
