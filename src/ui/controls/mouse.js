@@ -7,14 +7,8 @@ export function mouseZoomPan(game, event) {
 	// attempt to normalize wheel event data; some bits borrowed from
 	// https://gist.github.com/akella/11574989a9f3cc9e0ad47e401c12ccaf
 
-	let dx = event.wheelDeltaX;
-	let dy = event.wheelDeltaY;
-
-	// if the above are null, we're probably in firefox: fallback to deltas
-	if (dx == null || dy == null) {
-		dx = -event.deltaX * 50;
-		dy = -event.deltaY * 50;
-	}
+	let dx = -event.deltaX;
+	let dy = -event.deltaY;
 
 	// the shift key turns vertical scrolling into horizontal.
 	// also, some trackpads (unfortunately) use this to do side scrolling
