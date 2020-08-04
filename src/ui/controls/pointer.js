@@ -1,9 +1,3 @@
-const pStates = {
-	none: 0,
-	piece: 1,
-	camera: 2,
-};
-
 function initDragPointer(game, hit, pos) {
 	game.grabPieces(hit);
 
@@ -11,7 +5,7 @@ function initDragPointer(game, hit, pos) {
 		root: hit,
 		moved: false,
 		start: Date.now(),
-		offset: {x: hit.x - pos.x, y: hit.y - pos.y},
+		originalOffset: {x: hit.x - pos.x, y: hit.y - pos.y},
 	};
 }
 
@@ -25,7 +19,7 @@ function updatePointer(pointer, event) {
 
 function dragGroup(game, pointer) {
 	const pos = game.viewportToWorld(pointer.offsetX, pointer.offsetY);
-	pointer.root.moveTo(pos.x + pointer.offset.x, pos.y + pointer.offset.y);
+	pointer.root.moveTo(pos.x + pointer.originalOffset.x, pos.y + pointer.originalOffset.y);
 	pointer.moved = true;
 }
 
@@ -78,24 +72,26 @@ function dragCamera(game, [p1, p2]) {
 }
 
 export function setupPointerControls(game, canvas) {
-	let pState = pStates.none;
 	const pList = [];
 
 	canvas.addEventListener("pointerdown", (event) => {
 		event.preventDefault();
 
-		if (pState === pStates.none) {
+		if (pList.length === 0) {
 			const pos = game.viewportToWorld(event.offsetX, event.offsetY);
 			const hit = game.query(pos);
 
 			if (hit != null) {
-				pState = pStates.piece;
 				pList.push(updatePointer(initDragPointer(game, hit, pos), event));
 			} else {
-				pState = pStates.camera;
 				pList.push(updatePointer({pos}, event));
 			}
-		} else if (pState === pStates.camera && pList.length === 1) {
+		} else {
+			// ignore duplicates
+			if (pList.find((p) => p.pointerId === event.pointerId)) {
+				return;
+			}
+
 			const pos = game.viewportToWorld(event.offsetX, event.offsetY);
 			pList.push(updatePointer({pos}, event));
 		}
@@ -104,10 +100,10 @@ export function setupPointerControls(game, canvas) {
 	canvas.addEventListener("pointermove", (event) => {
 		event.preventDefault();
 
-		if (pState === pStates.piece && event.pointerId === pList[0].pointerId) {
+		if (pList.length === 1 && pList[0].root != null) {
 			updatePointer(pList[0], event);
 			dragGroup(game, pList[0]);
-		} else if (pState === pStates.camera) {
+		} else {
 			const index = pList.findIndex((p) => p.pointerId === event.pointerId);
 			if (index !== -1) {
 				updatePointer(pList[index], event);
@@ -119,26 +115,26 @@ export function setupPointerControls(game, canvas) {
 	function handlePointerUp(event) {
 		event.preventDefault();
 
-		if (pState === pStates.piece && event.pointerId === pList[0].pointerId) {
-			updatePointer(pList[0], event);
-			dropGroup(game, pList[0]);
-			game.save();
-			pList.pop();
-			pState = pStates.none;
-		} else if (pState === pStates.camera) {
-			const index = pList.findIndex((p) => p.pointerId === event.pointerId);
-			if (index !== -1) {
-				pList.splice(index, 1);
-				if (pList.length === 0) {
-					pState = pStates.none;
-				} else {
-					// re-pin remaining touch point to its current position
-					pList[0].pos = game.viewportToWorld(pList[0].offsetX, pList[0].offsetY);
-				}
+		const index = pList.findIndex((p) => p.pointerId === event.pointerId);
+		if (index !== -1) {
+			const pointer = pList.splice(index, 1)[0];
+			if (pointer.root != null) {
+				updatePointer(pointer, event);
+				dropGroup(game, pointer);
+				game.save();
+			}
+
+			if (pList.length !== 0) {
+				// re-pin new primary touch point to its current position
+				pList[0].pos = game.viewportToWorld(pList[0].offsetX, pList[0].offsetY);
 			}
 		}
 	}
 
 	document.addEventListener("pointerup", handlePointerUp);
-	return () => document.removeEventListener("pointerup", handlePointerUp);
+	document.addEventListener("pointercancel", handlePointerUp);
+	return () => {
+		document.removeEventListener("pointerup", handlePointerUp);
+		document.removeEventListener("pointercancel", handlePointerUp);
+	};
 }
