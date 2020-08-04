@@ -1,7 +1,11 @@
 import {loadSettings, addSettingsListener} from "../../logic/settings";
 
+let zoomScale = loadSettings().zoomScale;
 let panScale = loadSettings().panScale;
-addSettingsListener((settings) => panScale = settings.panScale);
+addSettingsListener((settings) => {
+	zoomScale = settings.zoomScale;
+	panScale = settings.panScale;
+});
 
 export function mouseZoomPan(game, event) {
 	// attempt to normalize wheel event data; some bits borrowed from
@@ -17,13 +21,13 @@ export function mouseZoomPan(game, event) {
 		dy = 0;
 	}
 
-	// as a last resort, since zoom speeds are unpredictable, allow user to
-	// manually adjust zoom/pan speeds
-	dx *= panScale;
-	dy *= panScale;
-
 	// zoom/pan logic
 	if (event.ctrlKey) {
+		// as a last resort, since zoom speeds are unpredictable,
+		// allow user to manually adjust zoom speed
+		dx *= zoomScale;
+		dy *= zoomScale;
+
 		// zoom
 		const zoomValue = 1 - dy / 1000;
 		const offx = event.offsetX, offy = event.offsetY;
@@ -35,6 +39,11 @@ export function mouseZoomPan(game, event) {
 		game.camera.x += oldPos.x - newPos.x;
 		game.camera.y += oldPos.y - newPos.y;
 	} else {
+		// as a last resort, since zoom speeds are unpredictable,
+		// allow user to manually adjust pan speed
+		dx *= panScale;
+		dy *= panScale;
+
 		// pan
 		game.camera.x -= dx * game.camera.zoom / 1000;
 		game.camera.y += dy * game.camera.zoom / 1000;

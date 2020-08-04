@@ -11,15 +11,17 @@ export function removeSettingsListener(listener) {
 const settingsKey = "jigsaw-settings";
 export function loadSettings() {
 	const savedString = localStorage.getItem(settingsKey);
-
-	if (savedString != null) {
-		return JSON.parse(savedString);
-	}
-
-	return {
+	const settings = {
 		bgColor: {r: 40, g: 40, b: 40, a: 1},
+		zoomScale: 1,
 		panScale: 1,
 	};
+
+	if (savedString != null) {
+		return Object.assign(settings, JSON.parse(savedString));
+	}
+
+	return settings;
 }
 
 export function saveSettings(settings) {
