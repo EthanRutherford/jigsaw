@@ -56,9 +56,9 @@ function dragCamera(game, [p1, p2]) {
 		const newPos1 = game.viewportToWorld(p1.offsetX, p1.offsetY);
 		const newPos2 = game.viewportToWorld(p2.offsetX, p2.offsetY);
 
-		const curCenter = {
-			x: (curPos1.x + curPos2.x) / 2,
-			y: (curPos1.y + curPos2.y) / 2,
+		const prevCenter = {
+			x: (p1.pos.x + p2.pos.x) / 2,
+			y: (p1.pos.y + p2.pos.y) / 2,
 		};
 
 		const newCenter = {
@@ -66,8 +66,8 @@ function dragCamera(game, [p1, p2]) {
 			y: (newPos1.y + newPos2.y) / 2,
 		};
 
-		game.camera.x += curCenter.x - newCenter.x;
-		game.camera.y += curCenter.y - newCenter.y;
+		game.camera.x += prevCenter.x - newCenter.x;
+		game.camera.y += prevCenter.y - newCenter.y;
 	}
 }
 
@@ -124,9 +124,9 @@ export function setupPointerControls(game, canvas) {
 				game.save();
 			}
 
-			if (pList.length !== 0) {
-				// re-pin new primary touch point to its current position
-				pList[0].pos = game.viewportToWorld(pList[0].offsetX, pList[0].offsetY);
+			// re-pin remaining touch points to their current positions
+			for (const pointer of pList) {
+				pointer.pos = game.viewportToWorld(pointer.offsetX, pointer.offsetY);
 			}
 		}
 	}
