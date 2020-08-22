@@ -6,20 +6,11 @@ export class Puzzle {
 		this.image = image;
 		this.width = image.width;
 		this.height = image.height;
-
-		// choose scale such that source image is at least 2000px wide
-		// this is primarily to ensure the piece borders are decently smooth
-		this.scale = Math.ceil(2000 / image.width);
 		this.c = columns;
 		this.r = rows;
 
-		// try to use whole numbers of pixels
-		const fw = image.width * this.scale;
-		const fh = image.height * this.scale;
-		this.w = Math.floor(fw / columns);
-		this.h = Math.floor(fh / rows);
-		this.rw = fw - (this.w * columns);
-		this.rh = fh - (this.h * rows);
+		this.w = Math.floor(image.width / columns);
+		this.h = Math.floor(image.height / rows);
 
 		if (horizontal != null && vertical != null) {
 			this.horizontal = horizontal;
@@ -30,35 +21,17 @@ export class Puzzle {
 			this.vertical = lines.vertical;
 		}
 	}
-	async drawPieces() {
-		const {image: img, horizontal, vertical, w: width, h: height, scale, c, r, rw, rh} = this;
-		const image = await createImageBitmap(img);
+	async makePieces() {
+		const {horizontal, vertical, w, h, c, r} = this;
 
 		return new Promise((resolve) => {
 			const worker = new PuzzleWorker();
 
-			const canvases = [];
-			const offscreens = [];
-			for (let i = 0; i < c * r; i++) {
-				const pair = [];
-				const opair = [];
-				for (let j = 0; j < 2; j++) {
-					const canvas = document.createElement("canvas");
-					pair.push(canvas);
-					opair.push(canvas.transferControlToOffscreen());
-				}
+			worker.postMessage({horizontal, vertical, w, h, c, r});
 
-				canvases.push(pair);
-				offscreens.push(opair);
-			}
-
-			worker.postMessage({
-				image, canvases: offscreens, horizontal, vertical, width, height, scale, c, r, rw, rh,
-			}, offscreens.flat());
-
-			worker.onmessage = () => {
+			worker.onmessage = (event) => {
 				worker.terminate();
-				resolve(canvases);
+				resolve(event.data);
 			};
 		});
 	}

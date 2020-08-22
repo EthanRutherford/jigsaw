@@ -11,7 +11,7 @@ function useGame(ids, puzzle, savedPieces) {
 	const [isLoading, setIsLoading] = useState(true);
 	const canvas = useRef();
 	useAsyncEffect(async () => {
-		const pieces = await puzzle.drawPieces();
+		const pieces = await puzzle.makePieces();
 		const game = new PuzzleGame(ids, puzzle, pieces, savedPieces, canvas.current);
 		game.setBgColor(loadSettings().bgColor);
 

@@ -1,100 +1,98 @@
-import {pieceSkinWidth} from "../constants";
+import bezier from "adaptive-bezier-curve";
+import earcut from "earcut";
 import {reverseEdge} from "./generate";
 
-function drawEdge(context, edge, w, h, x, y) {
-	for (const curve of edge) {
-		context.bezierCurveTo(
-			x + curve.c0.x * w, y + (curve.c0.y * h),
-			x + curve.c1.x * w, y + (curve.c1.y * h),
-			x + curve.to.x * w, y + (curve.to.y * h),
-		);
-	}
+function mapCurve(start, curve, x, y) {
+	return [
+		start,
+		[x + curve.c0.x, y + curve.c0.y],
+		[x + curve.c1.x, y + curve.c1.y],
+		[x + curve.to.x, y + curve.to.y],
+	];
 }
 
-function makeShadow(piece, shadow) {
-	shadow.width = piece.width;
-	shadow.height = piece.height;
-	const context = shadow.getContext("2d");
-	context.globalAlpha = .25;
-	context.drawImage(piece, 0, 0);
-	return shadow;
-}
-
-function drawPiece(image, pair, horizontal, vertical, width, height, scale, c, r, rw, rh, x, y) {
-	const [piece, shadow] = pair;
-	const skinW = Math.ceil(width * pieceSkinWidth);
-	const skinH = Math.ceil(height * pieceSkinWidth);
-	piece.width = skinW * 2 + width;
-	piece.height = skinH * 2 + height;
-
-	// for the right-most and bottom-most pieces, add the extra pixels
-	// also, draw each piece a tiny bit oversized to help seams render well
-	const w = width + (x === c - 1 ? rw : 0) + 2;
-	const h = height + (y === r - 1 ? rh : 0) + 2;
-
-	const left = skinW - 1;
-	const right = skinW - 1 + w;
-	const top = skinH - 1;
-	const bottom = skinH - 1 + h;
-
-	const context = piece.getContext("2d");
-	context.beginPath();
-	context.moveTo(left, top);
+// map bezier point to vertex and texture coord, respectively
+function makePiece(horizontal, vertical, w, h, c, r, x, y) {
+	const points = [[0, 0]];
 
 	// draw top edge
 	if (y === 0) {
-		context.lineTo(right, top);
+		points.push([1, 0]);
 	} else {
 		const edge = horizontal[y - 1][x];
-		drawEdge(context, edge, w, h, left, top);
+
+		for (const curve of edge) {
+			const mappedCurve = mapCurve(points.pop(), curve, 0, 0);
+			points.push(...bezier(...mappedCurve, 100));
+		}
 	}
 
 	// draw right edge
 	if (x === c - 1) {
-		context.lineTo(right, bottom);
+		points.push([1, 1]);
 	} else {
 		const edge = vertical[x][y];
-		drawEdge(context, edge, w, h, right, top);
+
+		for (const curve of edge) {
+			const mappedCurve = mapCurve(points.pop(), curve, 1, 0);
+			points.push(...bezier(...mappedCurve, 100));
+		}
 	}
 
 	// draw bottom edge
 	if (y === r - 1) {
-		context.lineTo(left, bottom);
+		points.push([0, 1]);
 	} else {
 		const edge = reverseEdge(horizontal[y][x], 0, 0);
-		drawEdge(context, edge, w, h, left, bottom);
+
+		for (const curve of edge) {
+			const mappedCurve = mapCurve(points.pop(), curve, 0, 1);
+			points.push(...bezier(...mappedCurve, 100));
+		}
 	}
 
 	// draw left edge
 	if (x === 0) {
-		context.lineTo(left, top);
+		points.push([0, 0]);
 	} else {
 		const edge = reverseEdge(vertical[x - 1][y], 0, 0);
-		drawEdge(context, edge, w, h, left, top);
-	}
 
-	context.fill();
-
-	// make shadow from current state
-	makeShadow(piece, shadow);
-
-	// paint image into the piece
-	context.globalCompositeOperation = "source-in";
-	context.imageSmoothingEnabled = false;
-	context.drawImage(image, left - (x * width), top - (y * height), image.width * scale, image.height * scale);
-}
-
-onmessage = function(event) {
-	const {image, canvases, horizontal, vertical, width, height, scale, c, r, rw, rh} = event.data;
-
-	for (let i = 0; i < c; i++) {
-		for (let j = 0; j < r; j++) {
-			const pair = canvases[i * r + j];
-			drawPiece(
-				image, pair, horizontal, vertical, width, height, scale, c, r, rw, rh, i, j,
-			);
+		for (const curve of edge) {
+			const mappedCurve = mapCurve(points.pop(), curve, 0, 0);
+			points.push(...bezier(...mappedCurve, 100));
 		}
 	}
 
-	requestAnimationFrame(() => postMessage("done"));
+	points.pop();
+	const tris = earcut(points.flat());
+
+	const vw = 1;
+	const vh = h / w;
+	const vhw = vw / 2;
+	const vhh = vh / 2;
+	const mVerts = points.map(([x, y]) => ({x: x * vw - vhw, y: (1 - y) * vh - vhh}));
+
+	const cw = 1 / c;
+	const ch = 1 / r;
+	const left = cw * x;
+	const bottom = ch * (r - 1 - y);
+	const mCoords = points.map(([x, y]) => ({x: left + x * cw, y: bottom + (1 - y) * ch}));
+
+	return {
+		verts: tris.map((i) => mVerts[i]),
+		tCoords: tris.map((i) => mCoords[i]),
+	};
+}
+
+onmessage = function(event) {
+	const {horizontal, vertical, w, h, c, r} = event.data;
+
+	const pieces = [];
+	for (let i = 0; i < c; i++) {
+		for (let j = 0; j < r; j++) {
+			pieces.push(makePiece(horizontal, vertical, w, h, c, r, i, j));
+		}
+	}
+
+	requestAnimationFrame(() => postMessage(pieces));
 };
