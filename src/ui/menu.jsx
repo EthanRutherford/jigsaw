@@ -28,7 +28,7 @@ function GameSnapshot({game}) {
 		}
 
 		const puzzle = Puzzle.fromSaveFormat(image, game.puzzle);
-		const pieces = await puzzle.drawPieces();
+		const pieces = await puzzle.makePieces();
 		if (getIsCancelled()) {
 			return null;
 		}

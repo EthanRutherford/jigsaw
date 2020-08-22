@@ -23,14 +23,22 @@ export class PuzzleGame {
 			return this.bvh.query(new AABB(x0, y0, x1, y1)).map((p) => p.piece.renderable);
 		};
 
+		// shadows use a 1x1 texture, since they're a uniform color
+		const shadow = document.createElement("canvas");
+		shadow.width = 1;
+		shadow.height = 1;
+		const context = shadow.getContext("2d");
+		context.globalAlpha = .25;
+		context.fillRect(0, 0, 1, 1);
+
 		// create pieces
 		this.pieces = [];
 		for (let i = 0; i < puzzle.c; i++) {
 			for (let j = 0; j < puzzle.r; j++) {
 				const id = i * puzzle.r + j;
-				const images = pieces[id];
+				const coords = pieces[id];
 
-				const piece = new Piece(id, i, j, this.renderer, images, puzzle.w, puzzle.h);
+				const piece = new Piece(id, i, j, this.renderer, coords, puzzle, shadow);
 
 				this.pieces.push(piece);
 				this.scene.add(piece.renderable);

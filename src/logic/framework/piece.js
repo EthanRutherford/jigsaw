@@ -37,26 +37,17 @@ class Group {
 }
 
 export class Piece {
-	constructor(id, x, y, renderer, [pieceImg, shadowImg], w, h) {
+	constructor(id, x, y, renderer, {verts, tCoords}, puzzle, shadowImg) {
 		this.id = id;
 		this.puzzleCoords = {x, y};
 		this.w = 1;
-		this.h = h / w;
+		this.h = puzzle.h / puzzle.w;
 		this.grabbed = false;
 
-		// compute ratio of image pixels to piece rect pixels
-		const hw = this.w * (pieceImg.width / w) / 2;
-		const hh = this.h * (pieceImg.height / h) / 2;
-		const shape = new Shape([
-			{x: -hw, y: -hh},
-			{x: hw, y: -hh},
-			{x: hw, y: hh},
-			{x: -hw, y: hh},
-		]);
+		const shape = new Shape(verts, Shape.triangles);
 
-		const spriteCoords = [{x: 0, y: 0}, {x: 1, y: 0}, {x: 1, y: 1}, {x: 0, y: 1}];
-		const shadowMaterial = new SpriteMaterial(spriteCoords, shadowImg);
-		const pieceMaterial = new SpriteMaterial(spriteCoords, pieceImg, false);
+		const shadowMaterial = new SpriteMaterial(tCoords, shadowImg);
+		const pieceMaterial = new SpriteMaterial(tCoords, puzzle.image, false);
 
 		this.renderable = renderer.getInstance(shape, pieceMaterial);
 		this.group = new Group(this);
