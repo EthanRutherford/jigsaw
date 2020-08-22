@@ -324,12 +324,17 @@ function boundRows(w, h, c, r) {
 
 	return r;
 }
-
+function computeBestRows(w, h, c) {
+	// initial suggestion should be the closest even number that results in
+	// pieces that are square (i.e. have an aspect ratio of 1:1)
+	const pieceWidth = w / c;
+	return Math.round((h / pieceWidth) / 2) * 2;
+}
 export function PuzzlePicker({gameId, image, startGame}) {
 	const w = image.value.width;
 	const h = image.value.height;
 	const [columns, setColumns] = useState(20);
-	const [rows, setRows] = useState(boundRows(w, h, 20, 10));
+	const [rows, setRows] = useState(computeBestRows(w, h, 20));
 
 	return (
 		<div className={styles.menu}>
