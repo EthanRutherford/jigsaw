@@ -94,5 +94,5 @@ onmessage = function(event) {
 		}
 	}
 
-	requestAnimationFrame(() => postMessage(pieces));
+	postMessage(pieces);
 };
