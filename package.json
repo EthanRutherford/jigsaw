@@ -11,7 +11,7 @@
     "start": "start webpack-dev-server"
   },
   "dependencies": {
-    "2d-gl": "^1.9.1",
+    "2d-gl": "^1.9.2",
     "adaptive-bezier-curve": "^1.0.3",
     "earcut": "^2.2.2",
     "react": "^16.13.1",
