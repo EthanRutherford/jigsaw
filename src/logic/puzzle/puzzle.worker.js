@@ -11,7 +11,6 @@ function mapCurve(start, curve, x, y) {
 	];
 }
 
-// map bezier point to vertex and texture coord, respectively
 function makePiece(horizontal, vertical, w, h, c, r, x, y) {
 	const points = [[0, 0]];
 
