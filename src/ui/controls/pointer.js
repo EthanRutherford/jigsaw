@@ -2,6 +2,7 @@ function initDragPointer(game, hit, pos) {
 	game.grabPieces(hit);
 
 	return {
+		pos,
 		root: hit,
 		moved: false,
 		start: Date.now(),
