@@ -4,8 +4,8 @@ function initDragPointer(game, hit, pos) {
 	return {
 		pos,
 		root: hit,
-		moved: false,
 		start: Date.now(),
+		travel: 0,
 		originalOffset: {x: hit.x - pos.x, y: hit.y - pos.y},
 	};
 }
@@ -19,14 +19,19 @@ function updatePointer(pointer, event) {
 }
 
 function dragGroup(game, pointer) {
-	const pos = game.viewportToWorld(pointer.offsetX, pointer.offsetY);
-	pointer.root.moveTo(pos.x + pointer.originalOffset.x, pos.y + pointer.originalOffset.y);
-	pointer.moved = true;
+	const curPos = game.viewportToWorld(pointer.offsetX, pointer.offsetY);
+	const newX = curPos.x + pointer.originalOffset.x;
+	const newY = curPos.y + pointer.originalOffset.y;
+	pointer.travel += Math.sqrt((newX - pointer.root.x) ** 2 + (newY - pointer.root.y) ** 2);
+	pointer.root.moveTo(newX, newY);
 }
 
 function dropGroup(game, pointer) {
 	// apply rotation if this was a tap
-	if (Date.now() - pointer.start < 100 || !pointer.moved) {
+	const elapsed = Date.now() - pointer.start;
+	const quickTap = elapsed < 200 && pointer.travel < .2;
+	const notMoved = elapsed < 1000 && pointer.travel < .01;
+	if (quickTap || notMoved) {
 		const diff = pointer.shiftKey ? 1 : -1;
 		let newOrientation = (pointer.root.orientation + diff) % 4;
 		if (newOrientation === -1) newOrientation = 3;
