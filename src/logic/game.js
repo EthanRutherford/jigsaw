@@ -33,12 +33,16 @@ export class PuzzleGame {
 
 		// create pieces
 		this.pieces = [];
+		this.edgeCount = puzzle.c * 2 + puzzle.r * 2 - 4;
 		for (let i = 0; i < puzzle.c; i++) {
+			const isHorizontalEdge = i === 0 || i === puzzle.c - 1;
 			for (let j = 0; j < puzzle.r; j++) {
 				const id = i * puzzle.r + j;
 				const coords = pieces[id];
+				const isVerticalEdge = j === 0 || j === puzzle.r - 1;
+				const isEdge = isHorizontalEdge || isVerticalEdge;
 
-				const piece = new Piece(id, i, j, this.renderer, coords, puzzle, shadow);
+				const piece = new Piece(id, i, j, this.renderer, coords, puzzle, shadow, isEdge);
 
 				this.pieces.push(piece);
 				this.scene.add(piece.renderable);
@@ -85,8 +89,10 @@ export class PuzzleGame {
 			}
 		}
 
-		// insert groups of pieces into the bvh and init zIndex values
+		// insert groups of pieces into the bvh and init zIndex values and frozenness
 		for (const group of groups) {
+			this.tryFreezeGroup(group);
+
 			let zIndex = 0;
 			for (const piece of group.pieces) {
 				const hits = this.bvh.insert(piece).map((c) => c.piece);
@@ -155,6 +161,9 @@ export class PuzzleGame {
 			}
 		}
 
+		// check for group freezing conditions
+		this.tryFreezeGroup(rootPiece.group);
+
 		// snap pieces in group to correct positions
 		rootPiece.group.correctPositions(snapToPiece);
 
@@ -173,6 +182,21 @@ export class PuzzleGame {
 		for (const piece of rootPiece.group.pieces) {
 			piece.grabbed = false;
 			piece.zIndex = zIndex + 2;
+		}
+	}
+	tryFreezeGroup(group) {
+		const aPiece = group.pieces.values().next().value;
+		if (!group.frozen && aPiece.orientation === 0) {
+			let edgeCount = 0;
+			for (const piece of group.pieces) {
+				if (piece.isEdge) {
+					edgeCount++;
+				}
+			}
+
+			if (edgeCount === this.edgeCount) {
+				group.frozen = true;
+			}
 		}
 	}
 	query(pos) {

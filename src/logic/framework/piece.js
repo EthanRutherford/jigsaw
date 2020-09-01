@@ -12,11 +12,13 @@ class Group {
 	constructor(parent) {
 		this.id = parent.id;
 		this.pieces = new Set([parent]);
+		this.frozen = false;
 	}
 	join(other) {
 		// the bigger group should eat the smaller group
 		const [subsumer, subsumed] = this.size > other.size ? [this, other] : [other, this];
 
+		subsumer.frozen = subsumer.frozen || subsumed.frozen;
 		for (const piece of subsumed.pieces) {
 			subsumer.pieces.add(piece);
 			piece.group = subsumer;
@@ -37,11 +39,12 @@ class Group {
 }
 
 export class Piece {
-	constructor(id, x, y, renderer, {verts, tCoords}, puzzle, shadowImg) {
+	constructor(id, x, y, renderer, {verts, tCoords}, puzzle, shadowImg, isEdge) {
 		this.id = id;
 		this.puzzleCoords = {x, y};
 		this.w = 1;
 		this.h = puzzle.h / puzzle.w;
+		this.isEdge = isEdge;
 		this.grabbed = false;
 
 		const shape = new Shape(verts, Shape.triangles);
