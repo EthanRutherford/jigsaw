@@ -31,7 +31,7 @@ function dropGroup(game, pointer) {
 	const elapsed = Date.now() - pointer.start;
 	const quickTap = elapsed < 200 && pointer.travel < .2;
 	const notMoved = elapsed < 1000 && pointer.travel < .01;
-	if (quickTap || notMoved) {
+	if (!pointer.root.group.frozen && (quickTap || notMoved)) {
 		const diff = pointer.shiftKey ? 1 : -1;
 		let newOrientation = (pointer.root.orientation + diff) % 4;
 		if (newOrientation === -1) newOrientation = 3;
