@@ -498,6 +498,7 @@
 	border: 2px solid var(--carbon);
 	border-radius: 2px;
 	width: 10px;
+	background-color: var(--carbon);
 }
 .menu__spinput--2Gm5t>button:last-of-type:after {
 	content: "";
@@ -508,6 +509,7 @@
 	border: 2px solid var(--carbon);
 	border-radius: 2px;
 	height: 10px;
+	background-color: var(--carbon);
 }
 .menu__spinput--2Gm5t>input {
 	flex-grow: 1;
