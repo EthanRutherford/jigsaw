@@ -141,11 +141,41 @@
 	width: 200px;
 }
 
-.input {
+.spinput {
+	display: flex;
 	border: 2px solid var(--carbon);
 	border-radius: 5px;
-	padding: 0 10px;
 	width: 100px;
+	background-color: white;
+}
+.spinput>button {
+	position: relative;
+	width:  24px;
+	height:  24px;
+}
+.spinput>button:before {
+	content: "";
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	border: 2px solid var(--carbon);
+	border-radius: 2px;
+	width: 10px;
+}
+.spinput>button:last-of-type:after {
+	content: "";
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	border: 2px solid var(--carbon);
+	border-radius: 2px;
+	height: 10px;
+}
+.spinput>input {
+	flex-grow: 1;
+	text-align: center;
 }
 
 .accept {
