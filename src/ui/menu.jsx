@@ -58,6 +58,44 @@ function GameSnapshot({game}) {
 	);
 }
 
+function Spinput(props) {
+	const input = useRef();
+	const timeout = useRef(null);
+	const interval = useRef(null);
+	const decrease = () => {
+		input.current.stepDown();
+		input.current.dispatchEvent(new Event("change", {bubbles: true}));
+	};
+	const increase = () => {
+		input.current.stepUp();
+		input.current.dispatchEvent(new Event("change", {bubbles: true}));
+	};
+	const spinDown = () => {
+		decrease();
+		timeout.current = setTimeout(() => {
+			interval.current = setInterval(decrease, 50);
+		}, 200);
+	};
+	const spinUp = () => {
+		increase();
+		timeout.current = setTimeout(() => {
+			interval.current = setInterval(increase, 50);
+		}, 200);
+	};
+	const unRepeat = () => {
+		clearTimeout(timeout.current);
+		clearInterval(interval.current);
+	};
+
+	return (
+		<div className={styles.spinput}>
+			<button onMouseDown={spinDown} onMouseUp={unRepeat} onMouseOut={unRepeat} />
+			<input type="number" {...props} ref={input} />
+			<button onMouseDown={spinUp} onMouseUp={unRepeat} onMouseOut={unRepeat} />
+		</div>
+	);
+}
+
 export function SaveGamePicker({startGame, newGame}) {
 	const [canPrompt, setCanPrompt] = useState();
 	const [gameList, setGameList] = useState();
@@ -340,9 +378,7 @@ export function PuzzlePicker({gameId, image, startGame}) {
 		<div className={styles.menu}>
 			<label className={styles.label}>
 				Columns
-				<input
-					className={styles.input}
-					type="number"
+				<Spinput
 					value={columns}
 					onChange={(event) => {
 						setColumns(event.target.value);
@@ -365,9 +401,7 @@ export function PuzzlePicker({gameId, image, startGame}) {
 			</label>
 			<label className={styles.label}>
 				Rows
-				<input
-					className={styles.input}
-					type="number"
+				<Spinput
 					value={rows}
 					onChange={(event) => {
 						setRows(event.target.value);
