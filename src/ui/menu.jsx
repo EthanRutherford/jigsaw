@@ -381,11 +381,12 @@ export function PuzzlePicker({gameId, image, startGame}) {
 				<Spinput
 					value={columns}
 					onChange={(event) => {
-						setColumns(event.target.value);
-
 						const value = Number.parseInt(event.target.value, 10);
 						if (!Number.isNaN(value)) {
+							setColumns(value);
 							setRows(clamp(boundRows(w, h, clamp(value, 5, 50), rows), 5, 50));
+						} else {
+							setColumns("");
 						}
 					}}
 					onBlur={() => {
@@ -404,11 +405,12 @@ export function PuzzlePicker({gameId, image, startGame}) {
 				<Spinput
 					value={rows}
 					onChange={(event) => {
-						setRows(event.target.value);
-
 						const value = Number.parseInt(event.target.value, 10);
 						if (!Number.isNaN(value)) {
+							setRows(value);
 							setColumns(clamp(boundColumns(w, h, columns, clamp(value, 5, 50)), 5, 50));
+						} else {
+							setRows("");
 						}
 					}}
 					onBlur={() => {
