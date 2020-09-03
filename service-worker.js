@@ -40,6 +40,18 @@ workbox.routing.registerRoute(
 	}),
 );
 
+workbox.routing.registerRoute(
+	/\/share-target/,
+	async ({event}) => {
+		const formData = await event.request.formData();
+		const client = await self.clients.get(event.resultingClientId || event.clientId);
+		const image = formData.get("image");
+		client.postMessage({image});
+		return Response.redirect("/");
+	},
+	"POST",
+);
+
 // prefill application cache
 self.addEventListener("install", (event) => {
 	const urls = [

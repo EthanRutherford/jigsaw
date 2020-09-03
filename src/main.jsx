@@ -1,5 +1,6 @@
 import {render} from "react-dom";
 import React, {useState, useEffect, useMemo} from "react";
+import {storeImage} from "./logic/jigsaw-db";
 import {Header} from "./ui/header";
 import {Game} from "./ui/game";
 import {SaveGamePicker, ImagePicker, PuzzlePicker} from "./ui/menu";
@@ -9,6 +10,10 @@ import styles from "./styles/root.css";
 if ("serviceWorker" in navigator) {
 	window.addEventListener("load", () => {
 		navigator.serviceWorker.register("/service-worker.js");
+
+		navigator.serviceWorker.onmessage = (event) => {
+			storeImage(event.data.image);
+		};
 	}, {once: true});
 }
 
