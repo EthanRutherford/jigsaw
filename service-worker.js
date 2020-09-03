@@ -47,7 +47,7 @@ workbox.routing.registerRoute(
 		const client = await self.clients.get(event.resultingClientId || event.clientId);
 		const image = formData.get("image");
 		client.postMessage({image});
-		return Response.redirect("/");
+		return Response.redirect("/", 303);
 	},
 	"POST",
 );
