@@ -44,9 +44,10 @@ workbox.routing.registerRoute(
 	/\/share-target/,
 	async ({event}) => {
 		const formData = await event.request.formData();
-		const client = await self.clients.get(event.resultingClientId || event.clientId);
 		const image = formData.get("image");
-		client.postMessage({image});
+		self.clients.get(event.resultingClientId || event.clientId).then(
+			(client) => client.postMessage({image}),
+		);
 		return Response.redirect("/", 303);
 	},
 	"POST",
