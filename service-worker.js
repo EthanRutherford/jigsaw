@@ -45,14 +45,16 @@ addEventListener("fetch", (event) => {
 		return;
 	}
 
-	event.respondWith(Response.redirect("/"));
-	event.waitUntil(async function() {
+	async function sendImage() {
 		const data = await event.request.formData();
 		const client = await self.clients.get(event.resultingClientId || event.clientId);
 
 		const image = data.get("image");
 		client.postMessage({image});
-	})();
+	}
+
+	event.respondWith(Response.redirect("/"));
+	event.waitUntil(sendImage());
 });
 
 // prefill application cache
