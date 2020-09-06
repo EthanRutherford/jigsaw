@@ -33,7 +33,6 @@ class Node {
 		this.children = [];
 		this.height = height;
 		this.piece = null;
-		this.thinAABB = null;
 	}
 	get isLeaf() {
 		return this.children.length === 0;
@@ -279,7 +278,6 @@ export class BVH {
 
 		const node = this.tree.insert(fat);
 		node.piece = piece;
-		node.thinAABB = aabb;
 		this.pieceToNode[piece.id] = node;
 
 		return this.query(fat);
@@ -290,7 +288,7 @@ export class BVH {
 	}
 	query(aabb) {
 		const contacts = [];
-		this.tree.query(aabb, (contact) => contacts.push(contact));
+		this.tree.query(aabb, (contact) => contacts.push(contact.piece));
 		return contacts;
 	}
 }

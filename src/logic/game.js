@@ -20,7 +20,7 @@ export class PuzzleGame {
 		this.scene = new Scene({bgColor: rgba(.15, .15, .15, 1)});
 		this.camera = new OrthoCamera(0, 0, puzzleHeight * 2);
 		this.scene.getVisibleFunc = (x0, y0, x1, y1) => {
-			return this.bvh.query(new AABB(x0, y0, x1, y1)).map((p) => p.piece.renderable);
+			return this.bvh.query(new AABB(x0, y0, x1, y1)).map((p) => p.renderable);
 		};
 
 		// shadows use a 1x1 texture, since they're a uniform color
@@ -95,7 +95,7 @@ export class PuzzleGame {
 
 			let zIndex = 0;
 			for (const piece of group.pieces) {
-				const hits = this.bvh.insert(piece).map((c) => c.piece);
+				const hits = this.bvh.insert(piece);
 				for (const hit of hits) {
 					if (!group.pieces.has(hit) && hit.zIndex > zIndex) {
 						zIndex = hit.zIndex;
@@ -132,7 +132,7 @@ export class PuzzleGame {
 		let snapToPiece = rootPiece;
 		for (const piece of rootPiece.group.pieces) {
 			bvh.remove(piece);
-			const hits = bvh.insert(piece).map((c) => c.piece);
+			const hits = bvh.insert(piece);
 
 			// check for connections
 			const filtered = hits.filter((p) => !piece.group.pieces.has(p));
@@ -171,7 +171,7 @@ export class PuzzleGame {
 		let zIndex = 0;
 		for (const piece of rootPiece.group.pieces) {
 			bvh.remove(piece);
-			const hits = bvh.insert(piece).map((c) => c.piece);
+			const hits = bvh.insert(piece);
 			for (const hit of hits) {
 				if (!piece.group.pieces.has(hit) && hit.zIndex > zIndex) {
 					zIndex = hit.zIndex;
@@ -209,22 +209,8 @@ export class PuzzleGame {
 			pos.y + camera.zoom / 200,
 		);
 
-		const hits = bvh.query(hitArea).map((c) => ({
-			piece: c.piece,
-			hitInner: hitArea.test(c.thinAABB) ? 1 : 0,
-			dist: (c.piece.x - pos.x) ** 2 + (c.piece.y - pos.y) ** 2,
-		}));
-
-		if (hits.length === 0) {
-			return null;
-		}
-
-		return hits.sort((a, b) => {
-			const hitDiff = b.hitInner - a.hitInner;
-			if (hitDiff !== 0) return hitDiff;
-			if (a.hitInner) return b.piece.zIndex - a.piece.zIndex;
-			return a.dist - b.dist;
-		})[0].piece;
+		const hits = bvh.query(hitArea).filter((p) => p.hitTest(pos.x, pos.y));
+		return hits.sort((a, b) => b.zIndex - a.zIndex)[0];
 	}
 	getPieces() {
 		const pieces = [];
