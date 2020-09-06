@@ -40,22 +40,18 @@ workbox.routing.registerRoute(
 	}),
 );
 
-addEventListener("fetch", (event) => {
-	if (event.request.method !== "POST" || !event.request.url.includes("share-target")) {
-		return;
-	}
-
-	async function sendImage() {
-		const data = await event.request.formData();
-		const client = await self.clients.get(event.resultingClientId || event.clientId);
-
-		const image = data.get("image");
-		client.postMessage({image});
-	}
-
-	event.respondWith(Response.redirect("/"));
-	event.waitUntil(sendImage());
-});
+workbox.routing.registerRoute(
+	/\/share-target/,
+	async ({event}) => {
+		const formData = await event.request.formData();
+		const image = formData.get("image");
+		self.clients.get(event.resultingClientId || event.clientId).then(
+			(client) => client.postMessage({image}),
+		);
+		return Response.redirect("/", 303);
+	},
+	"POST",
+);
 
 // prefill application cache
 self.addEventListener("install", (event) => {
