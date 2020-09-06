@@ -40,18 +40,20 @@ workbox.routing.registerRoute(
 	}),
 );
 
-workbox.routing.registerRoute(
-	/\/share-target/,
-	async ({event}) => {
-		const formData = await event.request.formData();
-		const image = formData.get("image");
-		self.clients.get(event.resultingClientId || event.clientId).then(
-			(client) => client.postMessage({image}),
-		);
-		return Response.redirect("/", 303);
-	},
-	"POST",
-);
+addEventListener("fetch", (event) => {
+	if (event.request.method !== "POST" || !event.request.url.contains("share-target")) {
+		return;
+	}
+
+	event.respondWith(Response.redirect("/"));
+	event.waitUntil(async function() {
+		const data = await event.request.formData();
+		const client = await self.clients.get(event.resultingClientId || event.clientId);
+
+		const image = data.get("image");
+		client.postMessage({image});
+	})();
+});
 
 // prefill application cache
 self.addEventListener("install", (event) => {
