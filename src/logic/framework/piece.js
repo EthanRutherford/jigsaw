@@ -39,18 +39,19 @@ class Group {
 }
 
 export class Piece {
-	constructor(id, x, y, renderer, {verts, tCoords}, puzzle, shadowImg, isEdge) {
+	constructor(id, x, y, renderer, geo, puzzle, shadowImg, isEdge) {
 		this.id = id;
 		this.puzzleCoords = {x, y};
 		this.w = 1;
 		this.h = puzzle.h / puzzle.w;
+		this.looseGeometry = geo.loose;
 		this.isEdge = isEdge;
 		this.grabbed = false;
 
-		const shape = new Shape(verts, Shape.triangles);
+		const shape = new Shape(geo.verts, Shape.triangles);
 
-		const shadowMaterial = new SpriteMaterial(tCoords, shadowImg);
-		const pieceMaterial = new SpriteMaterial(tCoords, puzzle.image, false);
+		const shadowMaterial = new SpriteMaterial(geo.tCoords, shadowImg);
+		const pieceMaterial = new SpriteMaterial(geo.tCoords, puzzle.image, false);
 
 		this.renderable = renderer.getInstance(shape, pieceMaterial);
 		this.group = new Group(this);
@@ -118,5 +119,25 @@ export class Piece {
 		}
 
 		this.group.correctPositions(this);
+	}
+	hitTest(x, y) {
+		const rotate = quickRotate[(4 - this.orientation) % 4];
+		const p = rotate({x: x - this.x, y: y - this.y});
+
+		// pnpoly
+		let inside = false;
+		const g = this.looseGeometry;
+		for (let i = 0, j = g.length - 1; i < g.length; j = i++) {
+			const p1 = g[i];
+			const p2 = g[j];
+			if (
+				((p1.y > p.y) !== (p2.y > p.y)) &&
+				(p.x < (p2.x - p1.x) * (p.y - p1.y) / (p2.y - p1.y) + p1.x)
+			) {
+				inside = !inside;
+			}
+		}
+
+		return inside;
 	}
 }
