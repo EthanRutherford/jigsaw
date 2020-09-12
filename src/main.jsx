@@ -3,7 +3,7 @@ import React, {useState, useEffect, useMemo} from "react";
 import {storeImage} from "./logic/jigsaw-db";
 import {Header} from "./ui/header";
 import {Game} from "./ui/game";
-import {SaveGamePicker, ImagePicker, PuzzlePicker, MultiplayerMenu} from "./ui/menu";
+import {SaveGamePicker, ImagePicker, PuzzlePicker} from "./ui/menu";
 import styles from "./styles/root.css";
 
 // register service worker
@@ -71,42 +71,28 @@ function App() {
 	const [state, pushState, goHome] = useCustomHistory();
 
 	const startGame = (gameData) => {
-		pushState({...state, gameData, page: "game"});
+		pushState({gameData, page: "game"});
 	};
+
 	const newGame = (gameId) => {
-		pushState({...state, gameId, page: "image"});
+		pushState({gameId, page: "image"});
 	};
+
 	const pickImage = (image) => {
-		pushState({...state, image, page: "puzzle"});
-	};
-	const goToMultiplayer = () => {
-		pushState({...state, page: "multiplayer"});
-	};
-	const hostGame = (roomId) => {
-		pushState({...state, roomId, page: "home"});
-	};
-	const joinGame = (roomId) => {
-		pushState({...state, roomId, gameData: {}, page: "game"});
+		pushState({gameId: state.gameId, image, page: "puzzle"});
 	};
 
 	return (
 		<div className={styles.app}>
-			<Header goHome={goHome} roomId={state.roomId} />
+			<Header goHome={goHome} />
 			{state.page === "home" ? (
-				<SaveGamePicker
-					startGame={startGame}
-					newGame={newGame}
-					goToMultiplayer={goToMultiplayer}
-					isHosting={state.roomId != null}
-				/>
+				<SaveGamePicker startGame={startGame} newGame={newGame} />
 			) : state.page === "image" ? (
 				<ImagePicker setImage={pickImage} />
 			) : state.page === "puzzle" ? (
 				<PuzzlePicker gameId={state.gameId} image={state.image} startGame={startGame} />
 			) : state.page === "game" ? (
-				<Game {...state.gameData} roomId={state.roomId} />
-			) : state.page === "multiplayer" ? (
-				<MultiplayerMenu hostGame={hostGame} joinGame={joinGame} />
+				<Game {...state.gameData} />
 			) : (
 				<div>this shouldn't happen :(</div>
 			)}

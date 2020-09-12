@@ -1,7 +1,8 @@
 .menu {
-	margin: 20px auto;
+	margin: auto;
 	width: var(--content-width);
 	max-width: var(--content-max-width);
+	margin-top: 20px;
 }
 
 .save-wrapper {
@@ -52,12 +53,11 @@
 	color: var(--red-dark);
 }
 
-.text-button {
+.new-game {
 	display: flex;
 	justify-content: center;
 	border: 2px solid var(--carbon);
 	border-radius: 5px;
-	margin-bottom: 10px;
 	padding: 10px;
 	width: 410px;
 	max-width: 100%;
@@ -133,25 +133,12 @@
 	display: none;
 }
 
-.label-200, .label-410 {
+.label {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	margin-bottom: 10px;
-}
-.label-200 {
 	width: 200px;
-}
-.label-410 {
-	width: 410px;
-}
-
-.input {
-	border: 2px solid var(--carbon);
-	border-radius: 5px;
-	padding: 0 10px;
-	width: 200px;
-	background-color: white;
 }
 
 .spinput {
@@ -204,7 +191,7 @@
 /* shared button pseudo styles */
 .saved-game:hover,
 .image-button:hover,
-.text-button:hover,
+.new-game:hover,
 .add-to-homescreen:hover,
 .upload-button:hover,
 .accept:hover {
@@ -213,22 +200,12 @@
 }
 .saved-game:active,
 .image-button:active,
-.text-button:active,
+.new-game:active,
 .add-to-homescreen:active,
 .upload-button:active,
 .accept:active {
 	border-color: black;
 	background: var(--baby);
 	color: black;
-}
-.saved-game:disabled,
-.image-button:disabled,
-.text-button:disabled,
-.add-to-homescreen:disabled,
-.upload-button:disabled,
-.accept:disabled {
-	border-color: var(--ash-dark);
-	background: var(--ash-light);
-	color: var(--ash-dark);
 }
 

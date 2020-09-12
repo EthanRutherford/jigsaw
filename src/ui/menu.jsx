@@ -11,7 +11,6 @@ import {
 } from "../logic/jigsaw-db";
 import {Puzzle} from "../logic/puzzle/puzzle";
 import {PuzzleGame} from "../logic/game";
-import {randomKey} from "../logic/random";
 import {removeSettingsListener, addSettingsListener, loadSettings} from "../logic/settings";
 import {notifyCanPrompt, promptForInstall} from "../pwa/install-prompt";
 import {useAsyncEffect} from "../hooks/use-async-effect";
@@ -97,7 +96,7 @@ function Spinput(props) {
 	);
 }
 
-export function SaveGamePicker({startGame, newGame, goToMultiplayer, isHosting}) {
+export function SaveGamePicker({startGame, newGame}) {
 	const [canPrompt, setCanPrompt] = useState();
 	const [gameList, setGameList] = useState();
 	const [deleteState, setDeleteState] = useState();
@@ -157,46 +156,39 @@ export function SaveGamePicker({startGame, newGame, goToMultiplayer, isHosting})
 			))}
 			{firstBlank <= 5 && (
 				<button
-					className={styles.textButton}
+					className={styles.newGame}
 					onClick={() => newGame(firstBlank)}
 				>
 					New game
 				</button>
 			)}
-			{!isHosting && (
-				<>
-					<button className={styles.textButton} onClick={goToMultiplayer}>
-						Multiplayer
-					</button>
-					{canPrompt && (
-						<button
-							className={styles.addToHomescreen}
-							onClick={() => promptForInstall().then(() => setCanPrompt(false))}
-						>
-							add to homescreen
-						</button>
-					)}
-					{deleteState != null && (
-						<Warning
-							header="Are you sure?"
-							content="This game cannot be restored later!"
-							confirm="Delete"
-							cancel="Cancel"
-							onConfirm={async () => {
-								await deleteGame(deleteState.id);
-								setDeleteState();
-								setGameList((list) => {
-									const index = list.findIndex((g) => g.id === deleteState.id);
-									return [
-										...list.slice(0, index),
-										...list.slice(index + 1),
-									];
-								});
-							}}
-							onCancel={() => setDeleteState()}
-						/>
-					)}
-				</>
+			{canPrompt && (
+				<button
+					className={styles.addToHomescreen}
+					onClick={() => promptForInstall().then(() => setCanPrompt(false))}
+				>
+					add to homescreen
+				</button>
+			)}
+			{deleteState != null && (
+				<Warning
+					header="Are you sure?"
+					content="This game cannot be restored later!"
+					confirm="Delete"
+					cancel="Cancel"
+					onConfirm={async () => {
+						await deleteGame(deleteState.id);
+						setDeleteState();
+						setGameList((list) => {
+							const index = list.findIndex((g) => g.id === deleteState.id);
+							return [
+								...list.slice(0, index),
+								...list.slice(index + 1),
+							];
+						});
+					}}
+					onCancel={() => setDeleteState()}
+				/>
 			)}
 		</div>
 	);
@@ -384,7 +376,7 @@ export function PuzzlePicker({gameId, image, startGame}) {
 
 	return (
 		<div className={styles.menu}>
-			<label className={styles.label200}>
+			<label className={styles.label}>
 				Columns
 				<Spinput
 					value={columns}
@@ -408,7 +400,7 @@ export function PuzzlePicker({gameId, image, startGame}) {
 					max={Math.min(50, boundColumns(w, h, 50, 50))}
 				/>
 			</label>
-			<label className={styles.label200}>
+			<label className={styles.label}>
 				Rows
 				<Spinput
 					value={rows}
@@ -447,60 +439,6 @@ export function PuzzlePicker({gameId, image, startGame}) {
 			>
 				Start game
 			</button>
-		</div>
-	);
-}
-
-export function MultiplayerMenu({hostGame, joinGame}) {
-	const [type, setType] = useState();
-	const [roomId, setRoomId] = useState("");
-
-	const setHost = () => {
-		setType("host");
-		setRoomId(randomKey);
-	};
-	const setClient = () => setType("client");
-	const setRoom = (event) => {
-		setRoomId(event.target.value.replace(/[^a-z]+/gi, "").slice(0, 10).toUpperCase());
-	};
-	const start = () => {
-		if (type === "host") {
-			hostGame(roomId);
-		} else {
-			joinGame(roomId);
-		}
-	};
-
-	return (
-		<div className={styles.menu}>
-			{type == null ? (
-				<>
-					<button className={styles.textButton} onClick={setHost}>
-						Host game
-					</button>
-					<button className={styles.textButton} onClick={setClient}>
-						Join game
-					</button>
-					<div style={{color: "var(--red)"}}>
-						Multiplayer is very much a work in progress.<br />
-						Expect to run into occasional bugs and hiccups.
-					</div>
-				</>
-			) : (
-				<>
-					<label className={styles.label410}>
-						Room Id
-						<input className={styles.input} value={roomId} onChange={setRoom} />
-					</label>
-					<button
-						className={styles.textButton}
-						disabled={roomId.length < 5}
-						onClick={start}
-					>
-						{type === "host" ? "Host" : "Join"} game
-					</button>
-				</>
-			)}
 		</div>
 	);
 }
