@@ -1,25 +1,36 @@
 // copy-paste from an as-of-yet unpublished project
 
+function icify(url) {
+	return {url, urls: [url]};
+}
+
 function connect(send, listen) {
 	const peerConnection = new RTCPeerConnection({iceServers: [
-		{urls: "stun:stun.l.google.com:19302"},
-		{urls: "stun:stun1.l.google.com:19302"},
-		{urls: "stun:stun2.l.google.com:19302"},
-		{urls: "stun:stun3.l.google.com:19302"},
-		{urls: "stun:stun4.l.google.com:19302"},
+		icify("stun:stun.l.google.com:19302"),
+		icify("stun:stun1.l.google.com:19302"),
+		icify("stun:stun2.l.google.com:19302"),
+		icify("stun:stun3.l.google.com:19302"),
+		icify("stun:stun4.l.google.com:19302"),
 	]});
 
-	peerConnection.onicecandidate = ({candidate}) => candidate != null && send({candidate});
+	peerConnection.onicecandidate = ({candidate}) => {
+		console.log(candidate);
+		candidate != null && send({candidate});
+	};
 	peerConnection.onnegotiationneeded = async () => {
 		await peerConnection.setLocalDescription(await peerConnection.createOffer());
 		send({desc: peerConnection.localDescription});
 	};
 
+	peerConnection.onicecandidateerror = console.log;
+	peerConnection.oniceconnectionstatechange = () => console.log(peerConnection.iceConnectionState);
+	peerConnection.onsignalingstatechange = () => console.log(peerConnection.signalingState);
+
 	listen(async (message) => {
 		if (message.desc != null) {
 			if (message.desc.type === "offer") {
 				await peerConnection.setRemoteDescription(message.desc);
-				await peerConnection.setLocalDescription(await peerConnection.createAnswer);
+				await peerConnection.setLocalDescription(await peerConnection.createAnswer());
 				send({desc: peerConnection.localDescription});
 			} else if (message.desc.type === "answer") {
 				await peerConnection.setRemoteDescription(message.desc);
@@ -34,6 +45,14 @@ function connect(send, listen) {
 	});
 
 	return peerConnection;
+}
+
+function sendCore(channelPromise, message) {
+	channelPromise.then((channel) => {
+		if (channel.readyState === "open") {
+			channel.send(message);
+		}
+	});
 }
 
 class Multiplexer {
@@ -68,16 +87,21 @@ class Multiplexer {
 		}
 	}
 	cleanupPeer(peer) {
-		peer.channels[this.name].then((channel) => channel.close());
-		delete peer.channels[this.name];
+		if (peer.channels[this.name] != null) {
+			peer.channels[this.name].then((channel) => channel.close());
+			delete peer.channels[this.name];
+		}
 	}
-	send(message) {
+	send(message, peerId = null) {
+		if (peerId != null) {
+			const peer = this.peers[peerId];
+			if (peer != null) {
+				sendCore(peer.channels[this.name], message);
+			}
+		}
+
 		for (const peer of Object.values(this.peers)) {
-			peer.channels[this.name].then((channel) => {
-				if (channel.readyState === "open") {
-					channel.send(message);
-				}
-			});
+			sendCore(peer.channels[this.name], message);
 		}
 	}
 }
@@ -135,8 +159,9 @@ export class PeerManager {
 					let timeout = null;
 					peer.connection.onconnectionstatechange = () => {
 						const state = peer.connection.connectionState;
+						console.log(state);
 						if (state === "failed") {
-							peer.connection.onnegotiationneeded();
+							// peer.connection.restartIce();
 							timeout = setTimeout(() => {
 								delete this.peers[peerId];
 								for (const channel of Object.values(this.channels)) {

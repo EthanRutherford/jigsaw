@@ -5,7 +5,7 @@ import {PeerManager} from "./peer";
 const wsBaseUrl = "wss://signal.rutherford.site";
 
 function segmentMessage(message) {
-	const segmentSize = 8000;
+	const segmentSize = 64000;
 	const segments = [];
 	while (message.length > 0) {
 		const segment = message.slice(0, segmentSize);
@@ -16,9 +16,12 @@ function segmentMessage(message) {
 	segments.push("done");
 	return segments;
 }
-function sendSegments(channel, segments) {
-	for (const segment of segments) {
-		channel.send(segment);
+function sendSegments(channel, segments, index = 0) {
+	channel.send(segments[index]);
+	index++;
+
+	if (index < segments.length) {
+		setTimeout(() => sendSegments(channel, segments, index), 10);
 	}
 }
 
@@ -34,7 +37,7 @@ class Node {
 	constructor(roomKey, isHost) {
 		const name = `jigsaw-${roomKey}`;
 		this.peerManager = new PeerManager(wsBaseUrl, name, isHost);
-		this.selfId = "-1";
+		this.selfId = -1;
 		this.peers = {[this.selfId]: {x: 0, y: 0}};
 		this.peerManager.onidchange = (newId) => {
 			this.peers[newId] = this.peers[this.selfId];
@@ -42,9 +45,12 @@ class Node {
 			this.selfId = newId;
 		};
 
-		this.imageChannel = this.peerManager.createDataChannel("image");
-		this.puzzleChannel = this.peerManager.createDataChannel("puzzle");
+		this.initChannel = this.peerManager.createDataChannel("init");
 		this.gameChannel = this.peerManager.createDataChannel("game");
+
+		this.gameChannel.onmessage = (event) => this.handleMessage(
+			event.peerId, JSON.parse(event.data),
+		);
 	}
 	setup(game) {
 		this.game = game;
@@ -65,9 +71,7 @@ class Node {
 export class Host extends Node {
 	constructor(roomKey) {
 		super(roomKey, true);
-		this.gameChannel.onmessage = (event) => this.handleMessage(
-			event.peerId, JSON.parse(event.data),
-		);
+		this.nextId = 0;
 
 		// temporarily manage peers, until the game actually starts
 		this.peerManager.onpeerconnected = (peerId) => {
@@ -78,19 +82,21 @@ export class Host extends Node {
 		};
 	}
 	setup(game, puzzle) {
-		const dataUrlSegments = segmentMessage(imageToDataUrl(puzzle.image));
-		const puzzleSegments = segmentMessage(JSON.stringify({
+		const dataUrl = imageToDataUrl(puzzle.image);
+		const initSegments = segmentMessage(JSON.stringify({
 			h: puzzle.horizontal,
 			v: puzzle.vertical,
 			p: game.getPieces(),
+			d: dataUrl,
 		}));
 
-		sendSegments(this.imageChannel, dataUrlSegments);
-		sendSegments(this.puzzleChannel, puzzleSegments);
+		if (Object.keys(this.peers).length !== 0) {
+			sendSegments(this.initChannel, initSegments);
+		}
+
 		this.peerManager.onpeerconnected = (peerId) => {
 			this.peers[peerId] = {x: 0, y: 0};
-			sendSegments(this.imageChannel, dataUrlSegments);
-			sendSegments(this.puzzleChannel, puzzleSegments);
+			sendSegments(this.initChannel, initSegments);
 		};
 		this.peerManager.onpeerlost = (peerId) => {
 			const peer = this.peers[peerId];
@@ -153,14 +159,31 @@ export class Host extends Node {
 		delete this.peers[this.selfId].piece;
 	}
 	sendUpdate() {
-		const messageSegments = segmentMessage(JSON.stringify({
-			pieces: this.game.pieces.map((p) => ({
-				id: p.id, x: p.x, y: p.y, o: p.orientation, g: p.group.id,
-			})),
-			peers: this.peers,
-		}));
+		// to keep message sizes small and quick, we only send 20 puzzle pieces at a time.
+		// we always send any pieces currently being dragged by a player, and then round
+		// robin remaining pieces to fill the buffer. This ensures that message sizes
+		// stay relatively small, while still ensuring every piece is synced periodically.
+		const pieceIds = new Set();
+		for (const peer of Object.values(this.peers)) {
+			if (peer.piece != null) {
+				pieceIds.add(peer.piece.id);
+			}
+		}
 
-		sendSegments(this.gameChannel, messageSegments);
+		while (pieceIds.size < 20) {
+			pieceIds.add(this.nextId++);
+			if (this.nextId === this.game.pieces.length) {
+				this.nextId = 0;
+			}
+		}
+
+		const pieces = [...pieceIds].map((id) => {
+			const p = this.game.pieces[id];
+			return {id, x: p.x, y: p.y, o: p.orientation, g: p.group.id};
+		});
+
+		const message = JSON.stringify({pieces, peers: this.peers});
+		this.gameChannel.send(message);
 	}
 }
 
@@ -168,18 +191,8 @@ export class Client extends Node {
 	constructor(roomKey) {
 		super(roomKey, false);
 		this.shouldSend = false;
-
-		let update = "";
-		this.gameChannel.onmessage = (event) => {
-			if (event.data === "done") {
-				this.handleMessage(JSON.parse(update));
-				update = "";
-			} else {
-				update += event.data;
-			}
-		};
 	}
-	handleMessage(message) {
+	handleMessage(_, message) {
 		if (this.game == null) {
 			return;
 		}
@@ -252,34 +265,17 @@ export class Client extends Node {
 	}
 	waitForData() {
 		return new Promise((resolve) => {
-			let doneCount = 0;
-			let dataUrl = "";
-			let puzzleJson = "";
-
-			async function onDone() {
-				const image = await dataUrlToImage(dataUrl);
-
-				const {h, v, p} = JSON.parse(puzzleJson);
-				const puzzle = new Puzzle(image, v.length + 1, h.length + 1, h, v);
-				resolve([puzzle, p]);
-			}
-
-			this.imageChannel.onmessage = (event) => {
+			let initJson = "";
+			this.initChannel.onmessage = async (event) => {
+				console.log("getting data");
 				if (event.data === "done") {
-					if (++doneCount === 2) {
-						onDone();
-					}
+					this.initChannel.onmessage = null;
+					const {h, v, p, d} = JSON.parse(initJson);
+					const image = await dataUrlToImage(d);
+					const puzzle = new Puzzle(image, v.length + 1, h.length + 1, h, v);
+					resolve([puzzle, p]);
 				} else {
-					dataUrl += event.data;
-				}
-			};
-			this.puzzleChannel.onmessage = (event) => {
-				if (event.data === "done") {
-					if (++doneCount === 2) {
-						onDone();
-					}
-				} else {
-					puzzleJson += event.data;
+					initJson += event.data;
 				}
 			};
 		});

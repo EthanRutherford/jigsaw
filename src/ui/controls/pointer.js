@@ -106,15 +106,20 @@ export function setupPointerControls(game, canvas) {
 	canvas.addEventListener("pointermove", (event) => {
 		event.preventDefault();
 
+		const pos = game.viewportToWorld(event.offsetX, event.offsetY);
 		if (pList.length === 1 && pList[0].root != null) {
 			updatePointer(pList[0], event);
 			dragGroup(game, pList[0]);
+
+			game.handlePointer(pos, pList[0].root);
 		} else {
 			const index = pList.findIndex((p) => p.pointerId === event.pointerId);
 			if (index !== -1) {
 				updatePointer(pList[index], event);
 				dragCamera(game, pList);
 			}
+
+			game.handlePointer(pos);
 		}
 	});
 
