@@ -335,10 +335,9 @@
 }
 
 .menu__menu--3rdlY {
-	margin: auto;
+	margin: 20px auto;
 	width: var(--content-width);
 	max-width: var(--content-max-width);
-	margin-top: 20px;
 }
 
 .menu__save-wrapper--3lhws {
@@ -389,11 +388,12 @@
 	color: var(--red-dark);
 }
 
-.menu__new-game--l881T {
+.menu__text-button--2SQVC {
 	display: flex;
 	justify-content: center;
 	border: 2px solid var(--carbon);
 	border-radius: 5px;
+	margin-bottom: 10px;
 	padding: 10px;
 	width: 410px;
 	max-width: 100%;
@@ -469,12 +469,25 @@
 	display: none;
 }
 
-.menu__label--3Lz2G {
+.menu__label-200--TcJeF, .menu__label-410--1adiZ {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	margin-bottom: 10px;
+}
+.menu__label-200--TcJeF {
 	width: 200px;
+}
+.menu__label-410--1adiZ {
+	width: 410px;
+}
+
+.menu__input--3aNgg {
+	border: 2px solid var(--carbon);
+	border-radius: 5px;
+	padding: 0 10px;
+	width: 200px;
+	background-color: white;
 }
 
 .menu__spinput--2Gm5t {
@@ -527,7 +540,7 @@
 /* shared button pseudo styles */
 .menu__saved-game--XA_En:hover,
 .menu__image-button--2VBCz:hover,
-.menu__new-game--l881T:hover,
+.menu__text-button--2SQVC:hover,
 .menu__add-to-homescreen--1eYum:hover,
 .menu__upload-button--1n831:hover,
 .menu__accept--2eLjd:hover {
@@ -536,13 +549,23 @@
 }
 .menu__saved-game--XA_En:active,
 .menu__image-button--2VBCz:active,
-.menu__new-game--l881T:active,
+.menu__text-button--2SQVC:active,
 .menu__add-to-homescreen--1eYum:active,
 .menu__upload-button--1n831:active,
 .menu__accept--2eLjd:active {
 	border-color: black;
 	background: var(--baby);
 	color: black;
+}
+.menu__saved-game--XA_En:disabled,
+.menu__image-button--2VBCz:disabled,
+.menu__text-button--2SQVC:disabled,
+.menu__add-to-homescreen--1eYum:disabled,
+.menu__upload-button--1n831:disabled,
+.menu__accept--2eLjd:disabled {
+	border-color: var(--ash-dark);
+	background: var(--ash-light);
+	color: var(--ash-dark);
 }
 
 
@@ -622,5 +645,6 @@ html, body, .root {
 .root__app--2mMcH {
 	background: var(--not-white);
 	min-height: 100%;
+	overflow: hidden;
 }
 
