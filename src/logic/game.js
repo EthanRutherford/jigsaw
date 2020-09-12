@@ -1,7 +1,6 @@
 import {Renderer, Scene, rgba, builtIn} from "2d-gl";
 import {AABB, BVH} from "./framework/bvh";
 import {Piece} from "./framework/piece";
-import {makePeerCursor} from "./multiplayer/peer-cursor";
 import {storeGame} from "./jigsaw-db";
 import {randFloat, randInt, randChance} from "./random";
 const {OrthoCamera} = builtIn;
@@ -20,25 +19,8 @@ export class PuzzleGame {
 		this.renderer = new Renderer(canvas);
 		this.scene = new Scene({bgColor: rgba(.15, .15, .15, 1)});
 		this.camera = new OrthoCamera(0, 0, puzzleHeight * 2);
-		this.cursors = [];
 		this.scene.getVisibleFunc = (x0, y0, x1, y1) => {
-			const renderables = this.bvh.query(new AABB(x0, y0, x1, y1)).map((p) => p.renderable);
-			if (this.mp == null) {
-				return renderables;
-			}
-
-			const cursors = this.mp.getCursors();
-			for (let i = 0; i < cursors.length; i++) {
-				if (i === this.cursors.length) {
-					this.cursors.push(makePeerCursor(this.renderer));
-				}
-
-				this.cursors[i].x = cursors[i].x;
-				this.cursors[i].y = cursors[i].y;
-				renderables.push(this.cursors[i]);
-			}
-
-			return renderables;
+			return this.bvh.query(new AABB(x0, y0, x1, y1)).map((p) => p.renderable);
 		};
 
 		// shadows use a 1x1 texture, since they're a uniform color
@@ -138,22 +120,13 @@ export class PuzzleGame {
 	setBgColor(c) {
 		this.scene.bgColor = rgba(c.r / 255, c.g / 255, c.b / 255);
 	}
-	handlePointer(pos, piece) {
-		if (this.mp != null) {
-			this.mp.handlePointer(pos, piece);
-		}
-	}
-	grabPieces(rootPiece, isLocal = true) {
+	grabPieces(rootPiece) {
 		for (const piece of rootPiece.group.pieces) {
 			piece.grabbed = true;
-			piece.zIndex = 9999;
-		}
-
-		if (isLocal && this.mp != null) {
-			this.mp.handleGrab(rootPiece);
+			piece.zIndex = 999;
 		}
 	}
-	placePieces(rootPiece, isLocal = true) {
+	placePieces(rootPiece) {
 		const {bvh} = this;
 
 		let snapToPiece = rootPiece;
@@ -210,10 +183,6 @@ export class PuzzleGame {
 			piece.grabbed = false;
 			piece.zIndex = zIndex + 2;
 		}
-
-		if (isLocal && this.mp != null) {
-			this.mp.handleDrop(rootPiece);
-		}
 	}
 	tryFreezeGroup(group) {
 		const aPiece = group.pieces.values().next().value;
@@ -244,21 +213,24 @@ export class PuzzleGame {
 		return hits.sort((a, b) => b.zIndex - a.zIndex)[0];
 	}
 	getPieces() {
-		return this.pieces.map((p) => ({
-			groupId: p.group.id,
-			x: p.x,
-			y: p.y,
-			o: p.orientation,
-		}));
-	}
-	async save() {
-		if (this.ids != null) {
-			await storeGame(this.ids.gameId, {
-				imageId: this.ids.imageId,
-				puzzleId: this.ids.puzzleId,
-				pieces: this.getPieces(),
+		const pieces = [];
+		for (const piece of this.pieces) {
+			pieces.push({
+				groupId: piece.group.id,
+				x: piece.x,
+				y: piece.y,
+				o: piece.orientation,
 			});
 		}
+
+		return pieces;
+	}
+	async save() {
+		await storeGame(this.ids.gameId, {
+			imageId: this.ids.imageId,
+			puzzleId: this.ids.puzzleId,
+			pieces: this.getPieces(),
+		});
 	}
 	animLoop() {
 		this.render();
@@ -267,9 +239,6 @@ export class PuzzleGame {
 	stopLoop() {
 		cancelAnimationFrame(this.animId);
 		this.animId = null;
-		if (this.mp != null) {
-			this.mp.close();
-		}
 	}
 	cleanup() {
 		for (const piece of this.pieces) {
