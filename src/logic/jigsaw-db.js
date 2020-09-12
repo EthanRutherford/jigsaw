@@ -178,10 +178,25 @@ export function imageToBlob(image) {
 	context.drawImage(image, 0, 0);
 	return canvasToBlob(canvas);
 }
+export function imageToDataUrl(image) {
+	const canvas = document.createElement("canvas");
+	canvas.width = image.width;
+	canvas.height = image.height;
+	const context = canvas.getContext("2d");
+	context.drawImage(image, 0, 0);
+	return canvas.toDataURL();
+}
 export function blobToImage(blob) {
 	return new Promise((resolve) => {
 		const image = new Image();
 		image.src = URL.createObjectURL(blob);
+		image.onload = () => resolve(image);
+	});
+}
+export function dataUrlToImage(dataUrl) {
+	return new Promise((resolve) => {
+		const image = new Image();
+		image.src = dataUrl;
 		image.onload = () => resolve(image);
 	});
 }
