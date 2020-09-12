@@ -1,29 +1,10 @@
 import {dataUrlToImage, imageToDataUrl} from "../jigsaw-db";
 import {Puzzle} from "../puzzle/puzzle";
-import {PeerManager} from "./peer";
 
+// one day, webrtc will actually work in chrome again.
+// until then, we just dump our messages through my tiny websocket server
+// like a chump
 const wsBaseUrl = "wss://signal.rutherford.site";
-
-function segmentMessage(message) {
-	const segmentSize = 64000;
-	const segments = [];
-	while (message.length > 0) {
-		const segment = message.slice(0, segmentSize);
-		message = message.slice(segmentSize);
-		segments.push(segment);
-	}
-
-	segments.push("done");
-	return segments;
-}
-function sendSegments(channel, segments, index = 0) {
-	channel.send(segments[index]);
-	index++;
-
-	if (index < segments.length) {
-		setTimeout(() => sendSegments(channel, segments, index), 10);
-	}
-}
 
 function updatePiece(game, update) {
 	const piece = game.pieces[update.id];
@@ -33,24 +14,86 @@ function updatePiece(game, update) {
 	return piece;
 }
 
+class PeerSocket {
+	constructor(baseUrl, roomId, isHost) {
+		this.closed = false;
+		this.selfId = null;
+
+		this.onnewpeer = null;
+		this.onlostpeer = null;
+		this.onconnectionlost = null;
+		this.onidchange = null;
+		this.onmessage = null;
+
+		let socketAttempts = 0;
+		this.pendingMessage = null;
+		const setupSocket = () => {
+			this.socket = new WebSocket(`${baseUrl}/${roomId}/${isHost ? "host" : "client"}`);
+			this.socket.onopen = () => socketAttempts = 0;
+			this.socket.onmessage = (event) => {
+				const {selfId, newPeerId, lostPeerId, peerId, data} = JSON.parse(event.data);
+				if (selfId != null && selfId !== this.selfId) {
+					this.selfId = selfId;
+					if (this.onidchange != null) {
+						this.onidchange(this.selfId);
+					}
+				}
+
+				if (newPeerId != null && this.onnewpeer != null) {
+					this.onnewpeer(newPeerId);
+				}
+
+				if (lostPeerId != null && this.onlostpeer != null) {
+					this.onlostpeer(lostPeerId);
+				}
+
+				if (data != null && this.onmessage != null) {
+					this.onmessage(peerId, data);
+				}
+			};
+			this.socket.onclose = () => {
+				if (socketAttempts++ < 5) {
+					// retry if we didn't close the connection on purpose
+					if (!this.closed) {
+						setupSocket();
+					}
+				} else if (this.onconnectionlost != null) {
+					this.onConnectionlost();
+				}
+			};
+		};
+
+		setupSocket();
+	}
+	async send(data, peerId) {
+		const message = {data};
+		if (peerId != null) {
+			message.peerId = peerId;
+		}
+
+		if (this.socket.readyState === 1) {
+			this.socket.send(JSON.stringify(message));
+		}
+	}
+	close() {
+		this.closed = true;
+		this.socket.close();
+	}
+}
+
 class Node {
 	constructor(roomKey, isHost) {
 		const name = `jigsaw-${roomKey}`;
-		this.peerManager = new PeerManager(wsBaseUrl, name, isHost);
+		this.peerSocket = new PeerSocket(wsBaseUrl, name, isHost);
 		this.selfId = -1;
 		this.peers = {[this.selfId]: {x: 0, y: 0}};
-		this.peerManager.onidchange = (newId) => {
+		this.peerSocket.onidchange = (newId) => {
 			this.peers[newId] = this.peers[this.selfId];
 			delete this.peers[this.selfId];
 			this.selfId = newId;
 		};
 
-		this.initChannel = this.peerManager.createDataChannel("init");
-		this.gameChannel = this.peerManager.createDataChannel("game");
-
-		this.gameChannel.onmessage = (event) => this.handleMessage(
-			event.peerId, JSON.parse(event.data),
-		);
+		this.peerSocket.onmessage = (peerId, message) => this.handleMessage(peerId, message);
 	}
 	setup(game) {
 		this.game = game;
@@ -64,7 +107,7 @@ class Node {
 	}
 	close() {
 		clearInterval(this.interval);
-		this.peerManager.close();
+		this.peerSocket.close();
 	}
 }
 
@@ -74,31 +117,30 @@ export class Host extends Node {
 		this.nextId = 0;
 
 		// temporarily manage peers, until the game actually starts
-		this.peerManager.onpeerconnected = (peerId) => {
+		this.peerSocket.onnewpeer = (peerId) => {
 			this.peers[peerId] = {x: 0, y: 0};
 		};
-		this.peerManager.onpeerlost = (peerId) => {
+		this.peerSocket.onlostpeer = (peerId) => {
 			delete this.peers[peerId];
 		};
 	}
 	setup(game, puzzle) {
-		const dataUrl = imageToDataUrl(puzzle.image);
-		const initSegments = segmentMessage(JSON.stringify({
+		const initMessage = {
 			h: puzzle.horizontal,
 			v: puzzle.vertical,
 			p: game.getPieces(),
-			d: dataUrl,
-		}));
+			d: imageToDataUrl(puzzle.image),
+		};
 
-		if (Object.keys(this.peers).length !== 0) {
-			sendSegments(this.initChannel, initSegments);
+		if (Object.keys(this.peers).length > 1) {
+			this.peerSocket.send(initMessage);
 		}
 
-		this.peerManager.onpeerconnected = (peerId) => {
+		this.peerSocket.onnewpeer = (peerId) => {
 			this.peers[peerId] = {x: 0, y: 0};
-			sendSegments(this.initChannel, initSegments);
+			this.peerSocket.send(initMessage, peerId);
 		};
-		this.peerManager.onpeerlost = (peerId) => {
+		this.peerSocket.onlostpeer = (peerId) => {
 			const peer = this.peers[peerId];
 			delete this.peers[peerId];
 
@@ -182,8 +224,7 @@ export class Host extends Node {
 			return {id, x: p.x, y: p.y, o: p.orientation, g: p.group.id};
 		});
 
-		const message = JSON.stringify({pieces, peers: this.peers});
-		this.gameChannel.send(message);
+		this.peerSocket.send({pieces, peers: this.peers});
 	}
 }
 
@@ -193,6 +234,15 @@ export class Client extends Node {
 		this.shouldSend = false;
 	}
 	handleMessage(_, message) {
+		if (message.h != null) {
+			this.initData = message;
+			if (this.initResolve != null) {
+				this.initResolve(this.initData);
+			}
+
+			return;
+		}
+
 		if (this.game == null) {
 			return;
 		}
@@ -205,9 +255,10 @@ export class Client extends Node {
 			}
 		}
 
-		const peersToDelete = new Set(Object.keys(this.peers));
+		const peersToDelete = new Set(Object.keys(this.peers).map((i) => Number.parseInt(i, 10)));
 		peersToDelete.delete(this.selfId);
-		for (const [peerId, peer] of Object.entries(message.peers)) {
+		for (const [x, peer] of Object.entries(message.peers)) {
+			const peerId = Number.parseInt(x, 10);
 			if (peerId === this.selfId) {
 				continue;
 			}
@@ -250,34 +301,33 @@ export class Client extends Node {
 	handleGrab(piece) {
 		const grab = {id: piece.id, x: piece.x, y: piece.y, o: piece.orientation};
 		this.peers[this.selfId].piece = grab;
-		this.gameChannel.send(JSON.stringify({grab}));
+		this.peerSocket.send({grab});
 	}
 	handleDrop(piece) {
 		const drop = {id: piece.id, x: piece.x, y: piece.y, o: piece.orientation};
 		delete this.peers[this.selfId].piece;
-		this.gameChannel.send(JSON.stringify({drop}));
+		this.peerSocket.send({drop});
 	}
 	sendUpdate() {
 		if (this.shouldSend) {
-			this.gameChannel.send(JSON.stringify(this.peers[this.selfId]));
+			this.peerSocket.send(this.peers[this.selfId]);
 			this.shouldSend = false;
 		}
 	}
 	waitForData() {
 		return new Promise((resolve) => {
-			let initJson = "";
-			this.initChannel.onmessage = async (event) => {
-				console.log("getting data");
-				if (event.data === "done") {
-					this.initChannel.onmessage = null;
-					const {h, v, p, d} = JSON.parse(initJson);
-					const image = await dataUrlToImage(d);
-					const puzzle = new Puzzle(image, v.length + 1, h.length + 1, h, v);
-					resolve([puzzle, p]);
-				} else {
-					initJson += event.data;
-				}
+			const resolver = async (initData) => {
+				const {h, v, p, d} = initData;
+				const image = await dataUrlToImage(d);
+				const puzzle = new Puzzle(image, v.length + 1, h.length + 1, h, v);
+				resolve([puzzle, p]);
 			};
+
+			if (this.initData) {
+				resolver(this.initData);
+			} else {
+				this.initResolve = resolver;
+			}
 		});
 	}
 }
