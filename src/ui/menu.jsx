@@ -473,6 +473,12 @@ export function MultiplayerMenu({type, setType, hostGame, joinGame}) {
 			joinGame(roomId);
 		}
 	};
+	const onKeyDown = (event) => {
+		if (event.key === "Enter") {
+			event.preventDefault();
+			start();
+		}
+	};
 
 	useEffect(() => {
 		if (type != null) {
@@ -499,7 +505,13 @@ export function MultiplayerMenu({type, setType, hostGame, joinGame}) {
 				<>
 					<label className={styles.label410}>
 						Room Id
-						<input className={styles.input} value={roomId} onChange={setRoom} ref={input} />
+						<input
+							className={styles.input}
+							value={roomId}
+							onChange={setRoom}
+							onKeyDown={onKeyDown}
+							ref={input}
+						/>
 					</label>
 					<button
 						className={styles.textButton}
