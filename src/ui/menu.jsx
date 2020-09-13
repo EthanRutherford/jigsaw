@@ -462,8 +462,8 @@ export function MultiplayerMenu({type, setType, hostGame, joinGame}) {
 						Join game
 					</button>
 					<div style={{color: "var(--red)"}}>
-						Multiplayer is very much a work in progress.<br />
-						Expect to run into occasional bugs and hiccups.
+						Multiplayer is a work in progress.<br />
+						Expect occasional bugs and hiccups.
 					</div>
 				</>
 			) : (
