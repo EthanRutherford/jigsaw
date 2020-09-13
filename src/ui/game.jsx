@@ -8,18 +8,27 @@ import {setupPointerControls} from "./controls/pointer";
 import {LoadSpinner} from "./load-spinner";
 import styles from "../styles/game.css";
 
-async function initGame(ids, roomId, puzzle, savedPieces, canvas, setImage) {
+const loadStates = {
+	none: 0,
+	waiting: 1,
+	initializing: 2,
+	done: 3,
+};
+
+async function initGame(ids, roomId, puzzle, savedPieces, canvas, setImage, setLoadState) {
 	let mp = null;
 	if (roomId != null) {
 		if (ids != null) {
 			mp = new Host(roomId);
 		} else {
+			setLoadState(loadStates.waiting);
 			mp = new Client(roomId);
 			[puzzle, savedPieces] = await mp.waitForData();
 			setImage(puzzle.image);
 		}
 	}
 
+	setLoadState(loadStates.initializing);
 	const pieces = await puzzle.makePieces();
 	const game = new PuzzleGame(ids, puzzle, pieces, savedPieces, canvas);
 	game.setBgColor(loadSettings().bgColor);
@@ -28,24 +37,22 @@ async function initGame(ids, roomId, puzzle, savedPieces, canvas, setImage) {
 		mp.setup(game, puzzle);
 	}
 
+	setLoadState(loadStates.done);
 	return game;
 }
 
 function useGame(ids, puzzle, savedPieces, roomId) {
-	const [isLoading, setIsLoading] = useState(true);
+	const [loadState, setLoadState] = useState(loadStates.none);
 	const [image, setImage] = useState(puzzle != null ? puzzle.image : null);
 	const canvas = useRef();
 	useAsyncEffect(async () => {
-		const game = await initGame(ids, roomId, puzzle, savedPieces, canvas.current, setImage);
+		const game = await initGame(ids, roomId, puzzle, savedPieces, canvas.current, setImage, setLoadState);
 
 		canvas.current.addEventListener("wheel", (event) => {
 			event.preventDefault();
 			mouseZoomPan(game, event);
 		}, {passive: false});
-
 		setupPointerControls(game, canvas.current);
-
-		setIsLoading(false);
 		game.animLoop();
 
 		const listenForColorChanges = (settings) => {
@@ -60,11 +67,11 @@ function useGame(ids, puzzle, savedPieces, roomId) {
 		};
 	}, []);
 
-	return [canvas, isLoading, image];
+	return [canvas, loadState, image];
 }
 
 export function Game({ids, puzzle, savedPieces, roomId}) {
-	const [canvas, isLoading, image] = useGame(ids, puzzle, savedPieces, roomId);
+	const [canvas, loadState, image] = useGame(ids, puzzle, savedPieces, roomId);
 	const [isPreviewing, setIsPreviewing] = useState(false);
 
 	return (
@@ -80,7 +87,15 @@ export function Game({ids, puzzle, savedPieces, roomId}) {
 					onClick={() => setIsPreviewing((i) => !i)}
 				/>
 			)}
-			{isLoading && <LoadSpinner />}
+			{loadState !== loadStates.done && (
+				<>
+					<LoadSpinner />
+					<div className={styles.loadIndicator}>
+						{loadState === loadStates.waiting && "Waiting for host..."}
+						{loadState === loadStates.initializing && "initializing game..."}
+					</div>
+				</>
+			)}
 		</div>
 	);
 }

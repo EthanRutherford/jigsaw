@@ -29,3 +29,10 @@
 .preview.open-preview {
 	width: 100vw;
 }
+
+.load-indicator {
+	position: absolute;
+	left: 50%;
+	top: calc(50% + 60px);
+	transform: translate(-50%, -50%);
+}

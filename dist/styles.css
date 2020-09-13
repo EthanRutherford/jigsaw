@@ -344,6 +344,13 @@
 	width: 100vw;
 }
 
+.game__load-indicator--3wZix {
+	position: absolute;
+	left: 50%;
+	top: calc(50% + 60px);
+	transform: translate(-50%, -50%);
+}
+
 .warning__warning-overlay--2WGv6 {
 	position: fixed;
 	top: 0;
