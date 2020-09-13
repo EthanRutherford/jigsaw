@@ -1,7 +1,7 @@
 import {Renderer, Scene, rgba, builtIn} from "2d-gl";
 import {AABB, BVH} from "./framework/bvh";
 import {Piece} from "./framework/piece";
-import {makePeerCursor} from "./multiplayer/peer-cursor";
+import {PeerCursor} from "./multiplayer/peer-cursor";
 import {storeGame} from "./jigsaw-db";
 import {randFloat, randInt, randChance} from "./random";
 const {OrthoCamera} = builtIn;
@@ -30,12 +30,18 @@ export class PuzzleGame {
 			const cursors = this.mp.getCursors();
 			for (let i = 0; i < cursors.length; i++) {
 				if (i === this.cursors.length) {
-					this.cursors.push(makePeerCursor(this.renderer));
+					this.cursors.push(new PeerCursor(this.renderer, cursors[i].color));
+				} else if (
+					cursors[i].color.r !== this.cursors[i].color.r ||
+					cursors[i].color.g !== this.cursors[i].color.g ||
+					cursors[i].color.b !== this.cursors[i].color.b
+				) {
+					this.cursors[i].updateColor(cursors[i].color);
 				}
 
 				this.cursors[i].x = cursors[i].x;
 				this.cursors[i].y = cursors[i].y;
-				renderables.push(this.cursors[i]);
+				renderables.push(this.cursors[i].renderable);
 			}
 
 			return renderables;
@@ -274,6 +280,9 @@ export class PuzzleGame {
 	cleanup() {
 		for (const piece of this.pieces) {
 			piece.free();
+		}
+		for (const cursor of this.cursors) {
+			cursor.free();
 		}
 
 		this.renderer.free();
