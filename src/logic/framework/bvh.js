@@ -13,6 +13,16 @@ export class AABB {
 
 		return true;
 	}
+	contains(other) {
+		if (
+			this.max.x < other.max.x || this.min.x > other.min.x ||
+			this.max.y < other.max.y || this.min.y > other.min.y
+		) {
+			return false;
+		}
+
+		return true;
+	}
 	get perimeter() {
 		return (this.max.x - this.min.x + this.max.y - this.min.y) * 2;
 	}
@@ -281,6 +291,12 @@ export class BVH {
 		this.pieceToNode[piece.id] = node;
 
 		return this.query(fat);
+	}
+	stillFits(piece) {
+		const hw = piece.w / 2;
+		const hh = piece.h / 2;
+		const aabb = new AABB(piece.x - hw, piece.y - hh, piece.x + hw, piece.y + hh);
+		return this.pieceToNode[piece.id].aabb.contains(aabb);
 	}
 	remove(piece) {
 		this.tree.remove(this.pieceToNode[piece.id]);
