@@ -170,6 +170,7 @@ export class Host extends Node {
 			if (peer.piece != null) {
 				const piece = this.game.pieces[peer.piece.id];
 				this.game.placePieces(piece, false);
+				this.game.save();
 			}
 		};
 
@@ -201,6 +202,7 @@ export class Host extends Node {
 			delete peer.piece;
 			const piece = updatePiece(this.game, message.drop);
 			this.game.placePieces(piece, false);
+			this.game.save();
 		}
 	}
 	handlePointer(pos, piece) {
