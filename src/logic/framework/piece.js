@@ -25,13 +25,17 @@ class Group {
 		}
 	}
 	correctPositions(root) {
+		if (this.frozen) {
+			root.orientation = 0;
+		}
+
 		for (const piece of this.pieces) {
 			if (piece === root) continue;
+			piece.orientation = root.orientation;
 
 			const correctPos = root.getConnectedPosition(piece);
 			piece.x = correctPos.x;
 			piece.y = correctPos.y;
-			piece.orientation = root.orientation;
 		}
 	}
 	get size() {
