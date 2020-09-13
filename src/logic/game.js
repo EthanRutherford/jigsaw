@@ -246,7 +246,7 @@ export class PuzzleGame {
 			pos.y + camera.zoom / 200,
 		);
 
-		const hits = bvh.query(hitArea).filter((p) => p.hitTest(pos.x, pos.y));
+		const hits = bvh.query(hitArea).filter((p) => !p.grabbed && p.hitTest(pos.x, pos.y));
 		return hits.sort((a, b) => b.zIndex - a.zIndex)[0];
 	}
 	getPieces() {
