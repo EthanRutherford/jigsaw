@@ -12,6 +12,7 @@ function updatePiece(game, update) {
 	piece.x = update.x;
 	piece.y = update.y;
 	piece.orientation = update.o;
+	piece.group.correctPositions(piece);
 	return piece;
 }
 
@@ -252,7 +253,7 @@ export class Host extends Node {
 export class Client extends Node {
 	constructor(roomKey) {
 		super(roomKey, false);
-		this.ignorePieceId = -1;
+		this.ignoreGroupId = -1;
 		this.ignoreTimeout = null;
 	}
 	handleMessage(_, message) {
@@ -270,7 +271,8 @@ export class Client extends Node {
 		}
 
 		for (const piece of message.pieces) {
-			if (piece.id !== this.ignorePieceId) {
+			const group = this.game.pieces[piece.id].group;
+			if (group.id !== this.ignoreGroupId) {
 				updatePiece(this.game, piece);
 			}
 		}
@@ -323,7 +325,7 @@ export class Client extends Node {
 		this.peers[this.selfId].piece = grab;
 		this.peerSocket.send({grab});
 
-		this.ignorePieceId = piece.id;
+		this.ignoreGroupId = piece.group.id;
 		clearTimeout(this.ignoreTimeout);
 	}
 	handleDrop(piece) {
@@ -331,7 +333,7 @@ export class Client extends Node {
 		delete this.peers[this.selfId].piece;
 		this.peerSocket.send({drop});
 
-		this.ignoreTimeout = setTimeout(() => this.ignorePieceId = null, 200);
+		this.ignoreTimeout = setTimeout(() => this.ignoreGroupId = null, 200);
 	}
 	sendUpdate() {
 		if (this.shouldSend) {
