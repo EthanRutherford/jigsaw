@@ -31,6 +31,7 @@ class Group {
 			const correctPos = root.getConnectedPosition(piece);
 			piece.x = correctPos.x;
 			piece.y = correctPos.y;
+			piece.orientation = root.orientation;
 		}
 	}
 	get size() {
