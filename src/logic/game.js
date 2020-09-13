@@ -206,7 +206,11 @@ export class PuzzleGame {
 			bvh.remove(piece);
 			const hits = bvh.insert(piece);
 			for (const hit of hits) {
-				if (!piece.group.pieces.has(hit) && hit.zIndex > zIndex) {
+				if (
+					!piece.group.pieces.has(hit) &&
+					!piece.grabbed &&
+					hit.zIndex > zIndex
+				) {
 					zIndex = hit.zIndex;
 				}
 			}

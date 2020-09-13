@@ -143,20 +143,25 @@ export class Host extends Node {
 		};
 	}
 	setup(game, puzzle) {
-		const initMessage = {
-			h: puzzle.horizontal,
-			v: puzzle.vertical,
-			p: game.getPieces(),
-			d: imageToDataUrl(puzzle.image),
-		};
+		const dataUrl = imageToDataUrl(puzzle.image);
 
 		if (Object.keys(this.peers).length > 1) {
-			this.peerSocket.send(initMessage);
+			this.peerSocket.send({
+				h: puzzle.horizontal,
+				v: puzzle.vertical,
+				p: game.getPieces(),
+				d: dataUrl,
+			});
 		}
 
 		this.peerSocket.onnewpeer = (peerId) => {
 			this.peers[peerId] = {x: 0, y: 0, c: {r: 255, g: 255, b: 255}};
-			this.peerSocket.send(initMessage, peerId);
+			this.peerSocket.send({
+				h: puzzle.horizontal,
+				v: puzzle.vertical,
+				p: game.getPieces(),
+				d: dataUrl,
+			}, peerId);
 		};
 		this.peerSocket.onlostpeer = (peerId) => {
 			const peer = this.peers[peerId];
