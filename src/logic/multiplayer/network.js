@@ -310,13 +310,6 @@ export class Client extends Node {
 
 			delete this.peers[peerId];
 		}
-
-		for (const piece of message.pieces) {
-			const group = this.game.pieces[piece.id].group;
-			if (group.id !== this.ignoreGroupId) {
-				this.game.placePieces(this.game.pieces[piece.id], false);
-			}
-		}
 	}
 	handlePointer(pos, piece) {
 		this.peers[this.selfId].x = pos.x;
