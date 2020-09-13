@@ -17,6 +17,7 @@ import {notifyCanPrompt, promptForInstall} from "../pwa/install-prompt";
 import {useAsyncEffect} from "../hooks/use-async-effect";
 import {LoadSpinner} from "./load-spinner";
 import {Warning} from "./warning";
+import {Spinput} from "./spinput";
 import styles from "../styles/menu.css";
 
 function GameSnapshot({game}) {
@@ -55,44 +56,6 @@ function GameSnapshot({game}) {
 		<div className={styles.snapshotContainer}>
 			<canvas className={styles.snapshot} ref={canvas} />
 			{isLoading && <LoadSpinner />}
-		</div>
-	);
-}
-
-function Spinput(props) {
-	const input = useRef();
-	const timeout = useRef(null);
-	const interval = useRef(null);
-	const decrease = () => {
-		input.current.stepDown();
-		input.current.dispatchEvent(new Event("change", {bubbles: true}));
-	};
-	const increase = () => {
-		input.current.stepUp();
-		input.current.dispatchEvent(new Event("change", {bubbles: true}));
-	};
-	const spinDown = () => {
-		decrease();
-		timeout.current = setTimeout(() => {
-			interval.current = setInterval(decrease, 50);
-		}, 200);
-	};
-	const spinUp = () => {
-		increase();
-		timeout.current = setTimeout(() => {
-			interval.current = setInterval(increase, 50);
-		}, 200);
-	};
-	const unRepeat = () => {
-		clearTimeout(timeout.current);
-		clearInterval(interval.current);
-	};
-
-	return (
-		<div className={styles.spinput}>
-			<button onMouseDown={spinDown} onMouseUp={unRepeat} onMouseOut={unRepeat} />
-			<input type="number" {...props} ref={input} />
-			<button onMouseDown={spinUp} onMouseUp={unRepeat} onMouseOut={unRepeat} />
 		</div>
 	);
 }
@@ -384,9 +347,10 @@ export function PuzzlePicker({gameId, image, startGame}) {
 
 	return (
 		<div className={styles.menu}>
-			<label className={styles.label200}>
+			<label htmlFor="columns" className={styles.label200}>
 				Columns
 				<Spinput
+					id="columns"
 					value={columns}
 					onChange={(event) => {
 						const value = Number.parseInt(event.target.value, 10);
@@ -408,9 +372,10 @@ export function PuzzlePicker({gameId, image, startGame}) {
 					max={Math.min(50, boundColumns(w, h, 50, 50))}
 				/>
 			</label>
-			<label className={styles.label200}>
+			<label htmlFor="rows" className={styles.label200}>
 				Rows
 				<Spinput
+					id="rows"
 					value={rows}
 					onChange={(event) => {
 						const value = Number.parseInt(event.target.value, 10);

@@ -15,6 +15,8 @@ export function loadSettings() {
 		bgColor: {r: 40, g: 40, b: 40, a: 1},
 		zoomScale: 1,
 		panScale: 1,
+		mpColor: {r: 50, g: 100, b: 200, a: 1},
+		name: "puzzler",
 	};
 
 	if (savedString != null) {
