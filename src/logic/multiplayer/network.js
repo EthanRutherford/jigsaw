@@ -276,8 +276,8 @@ export class Client extends Node {
 		}
 
 		for (const piece of message.pieces) {
-			const group = this.game.pieces[piece.id].group;
-			if (group.id !== this.ignoreGroupId) {
+			const ours = this.game.pieces[piece.id];
+			if (ours.group.id !== this.ignoreGroupId) {
 				updatePiece(this.game, piece);
 			}
 		}
@@ -309,6 +309,22 @@ export class Client extends Node {
 			}
 
 			delete this.peers[peerId];
+		}
+
+		for (const piece of message.pieces) {
+			const ours = this.game.pieces[piece.id];
+			if (ours.group.id !== this.ignoreGroupId) {
+				if (ours.group.id !== piece.g) {
+					const group = this.game.pieces[piece.g].group;
+					group.join(ours.group);
+					group.id = piece.g;
+					group.correctPositions(ours);
+					this.game.placePieces(ours);
+				} else if (!this.game.bvh.stillFits(ours)) {
+					this.game.bvh.remove(ours);
+					this.game.bvh.insert(ours);
+				}
+			}
 		}
 	}
 	handlePointer(pos, piece) {
