@@ -76,6 +76,47 @@
 	z-index: 1;
 }
 
+.spinput__spinput--1_Fib {
+	display: flex;
+	border: 2px solid var(--carbon);
+	border-radius: 5px;
+	width: 100px;
+	background-color: white;
+}
+.spinput__spinput--1_Fib>button {
+	position: relative;
+	flex: 0 0 24px;
+	width:  24px;
+	height:  24px;
+}
+.spinput__spinput--1_Fib>button:before {
+	content: "";
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	border: 2px solid var(--carbon);
+	border-radius: 2px;
+	width: 10px;
+	background-color: var(--carbon);
+}
+.spinput__spinput--1_Fib>button:last-of-type:after {
+	content: "";
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	border: 2px solid var(--carbon);
+	border-radius: 2px;
+	height: 10px;
+	background-color: var(--carbon);
+}
+.spinput__spinput--1_Fib>input {
+	flex: 1 0 0;
+	min-width: 0;
+	text-align: center;
+}
+
 .settings__overlay--2BK1h {
 	position: fixed;
 	left: 0;
@@ -91,21 +132,54 @@
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	padding: 20px;
+	border: 2px solid var(--carbon);
+	border-radius: 5px;
 	width: 320px;
 	max-height: calc(100vh - 40px);
 	background-color: white;
 	overflow-y: auto;
 }
 
-.settings__header--aA5az {
-	margin-bottom: 20px;
-	font-size: var(--huge);
+.settings__tabs--21-WO {
+	display: flex;
+}
+.settings__tab--1kYF0 {
+	position: relative;
+	flex-grow: 1;
+	padding: 10px 0;
+	font-size: var(--large);
+}
+.settings__tab--1kYF0:after {
+	content: "";
+	box-sizing: border-box;
+	position: absolute;
+	left: 50%;
+	bottom: 0;
+	border-radius: 2px;
+	height: 4px;
+	width: 0;
+	background-color: var(--carbon);
+	transform: translateX(-50%);
+	transition: width .2s;
+	overflow: hidden;
+}
+.settings__tab--1kYF0:hover:after {
+	width: 50%;
+}
+.settings__tab--1kYF0.settings__selected--2LtAw:after {
+	width: 100%;
+}
+
+.settings__content--UKASY {
+	padding: 10px 20px 20px;
 }
 
 .settings__sub-header--1EB9s {
 	margin: 20px 0 10px;
 	font-size: var(--normal);
+}
+.settings__sub-header--1EB9s:first-child {
+	margin-top: 0;
 }
 
 .settings__description--1GyFg {
@@ -113,15 +187,28 @@
 	font-size: var(--small);
 }
 
-.settings__mode-picker--28HHm, .settings__scale-input--3mG9_ {
+.settings__color-header--R8Wr3 {
+	display: flex;
+}
+.settings__color-swatch--HfNBE {
+	flex-grow: 1;
+	border: 2px solid var(--carbon);
+	border-radius: 5px;
+	margin-left: 10px;
+	height: 30px;
+}
+.settings__mode-picker--28HHm, .settings__input--1kMAt {
 	display: block;
 	border: 2px solid var(--carbon);
 	border-radius: 5px;
 	padding: 0 10px;
-	width: 100px;
 }
 .settings__mode-picker--28HHm {
 	margin-bottom: 10px;
+	width: 100px;
+}
+.settings__input--1kMAt {
+	width: 100%;
 }
 
 .settings__slider--26A7X, .settings__sv-picker--3-ZEa {
@@ -490,45 +577,6 @@
 	background-color: white;
 }
 
-.menu__spinput--2Gm5t {
-	display: flex;
-	border: 2px solid var(--carbon);
-	border-radius: 5px;
-	width: 100px;
-	background-color: white;
-}
-.menu__spinput--2Gm5t>button {
-	position: relative;
-	width:  24px;
-	height:  24px;
-}
-.menu__spinput--2Gm5t>button:before {
-	content: "";
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	transform: translate(-50%, -50%);
-	border: 2px solid var(--carbon);
-	border-radius: 2px;
-	width: 10px;
-	background-color: var(--carbon);
-}
-.menu__spinput--2Gm5t>button:last-of-type:after {
-	content: "";
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	transform: translate(-50%, -50%);
-	border: 2px solid var(--carbon);
-	border-radius: 2px;
-	height: 10px;
-	background-color: var(--carbon);
-}
-.menu__spinput--2Gm5t>input {
-	flex-grow: 1;
-	text-align: center;
-}
-
 .menu__accept--2eLjd {
 	border: 2px solid var(--carbon);
 	border-radius: 5px;
@@ -603,8 +651,12 @@
 
 	/* blues */
 	--baby: hsl(210, 50%, 90%);
+	--baby-dark: hsl(210, 80%, 60%);
 }
 
+* {
+	transition: box-shadow .2s;
+}
 html, body, div, span, p, a, img,
 h1, h2, h3, h4, h5, h6,
 b, u, i, center, ol, ul, li,
@@ -624,6 +676,7 @@ html {
 }
 :focus {
 	outline: 0;
+	box-shadow: 0 0 2px 2px var(--baby-dark);
 }
 button {
 	background: none;
