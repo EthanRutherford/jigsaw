@@ -1,6 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap');
 @import "./variables.css";
 
+* {
+	transition: box-shadow .2s;
+}
 html, body, div, span, p, a, img,
 h1, h2, h3, h4, h5, h6,
 b, u, i, center, ol, ul, li,
@@ -20,6 +23,7 @@ html {
 }
 :focus {
 	outline: 0;
+	box-shadow: 0 0 2px 2px var(--baby-dark);
 }
 button {
 	background: none;
