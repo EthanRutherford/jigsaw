@@ -243,14 +243,16 @@ export class PuzzleGame {
 	query(pos) {
 		const {camera, bvh} = this;
 
+		const hitRadius = camera.zoom / 100;
 		const hitArea = new AABB(
-			pos.x - camera.zoom / 200,
-			pos.y - camera.zoom / 200,
-			pos.x + camera.zoom / 200,
-			pos.y + camera.zoom / 200,
+			pos.x - hitRadius, pos.y - hitRadius,
+			pos.x + hitRadius, pos.y + hitRadius,
 		);
 
-		const hits = bvh.query(hitArea).filter((p) => !p.grabbed && p.hitTest(pos.x, pos.y));
+		const hits = bvh.query(hitArea).filter(
+			(p) => !p.grabbed && p.hitTest(pos.x, pos.y, hitRadius),
+		);
+
 		return hits.sort((a, b) => b.zIndex - a.zIndex)[0];
 	}
 	getPieces() {
