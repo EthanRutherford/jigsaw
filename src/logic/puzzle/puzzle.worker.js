@@ -81,6 +81,7 @@ function makePiece(horizontal, vertical, w, h, c, r, x, y) {
 	// draw left edge
 	if (x === 0) {
 		points.push([0, 0]);
+		loosePoints.push([0, 0]);
 	} else {
 		const edge = reverseEdge(vertical[x - 1][y], 0, 0);
 

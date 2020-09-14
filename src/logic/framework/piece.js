@@ -125,9 +125,15 @@ export class Piece {
 
 		this.group.correctPositions(this);
 	}
-	hitTest(x, y) {
+	hitTest(x, y, radius) {
 		const rotate = quickRotate[(4 - this.orientation) % 4];
 		const p = rotate({x: x - this.x, y: y - this.y});
+
+		// nudge point toward the center by radius
+		const l = Math.sqrt(p.x ** 2 + p.y ** 2);
+		const scale = Math.max(0, l - radius) / l;
+		p.x *= scale;
+		p.y *= scale;
 
 		// pnpoly
 		let inside = false;
