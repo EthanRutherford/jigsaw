@@ -142,6 +142,36 @@ export function setupPointerControls(game, canvas) {
 		}
 	}
 
+	game.preRender = (elapsed) => {
+		if (pList.length !== 1 || pList[0].root == null) {
+			return;
+		}
+
+		const timeScale = elapsed / 20;
+
+		// if close to the edge of the screen, scroll screen
+		let moved = false;
+		const {width, height} = game.renderer.canvas;
+		const x = pList[0].offsetX / width;
+		const y = 1 - (pList[0].offsetY / height);
+		if (x < .05 || x > .95) {
+			const v = x - .5;
+			const scale = v - Math.sign(v) * .45;
+			game.camera.x += scale * game.camera.zoom * timeScale;
+			moved = true;
+		}
+		if (y < .05 || y > .95) {
+			const v = y - .5;
+			const scale = v - Math.sign(v) * .45;
+			game.camera.y += scale * game.camera.zoom * timeScale;
+			moved = true;
+		}
+
+		if (moved) {
+			dragGroup(game, pList[0]);
+		}
+	};
+
 	document.addEventListener("pointerup", handlePointerUp);
 	document.addEventListener("pointercancel", handlePointerUp);
 	return () => {
