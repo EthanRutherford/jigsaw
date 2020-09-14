@@ -134,6 +134,7 @@ export class PuzzleGame {
 
 		this.animId = null;
 		this.animLoop = this.animLoop.bind(this);
+		this.lastStamp = 0;
 	}
 	viewportToWorld(x, y) {
 		return this.renderer.viewportToWorld(x, y, this.camera);
@@ -272,7 +273,13 @@ export class PuzzleGame {
 			});
 		}
 	}
-	animLoop() {
+	animLoop(stamp = 0) {
+		const elapsed = stamp - this.lastStamp;
+		this.lastStamp = stamp;
+		if (this.preRender != null) {
+			this.preRender(elapsed);
+		}
+
 		this.render();
 		this.animId = requestAnimationFrame(this.animLoop);
 	}
