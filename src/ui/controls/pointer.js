@@ -152,8 +152,9 @@ export function setupPointerControls(game, canvas) {
 		// if close to the edge of the screen, scroll screen
 		let moved = false;
 		const {width, height} = game.renderer.canvas;
-		const x = pList[0].offsetX / width;
-		const y = 1 - (pList[0].offsetY / height);
+		const dpr = window.devicePixelRatio || 1;
+		const x = pList[0].offsetX * dpr / width;
+		const y = 1 - (pList[0].offsetY * dpr / height);
 		if (x < .05 || x > .95) {
 			const v = x - .5;
 			const scale = v - Math.sign(v) * .45;
