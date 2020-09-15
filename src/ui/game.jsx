@@ -15,14 +15,14 @@ const loadStates = {
 	done: 3,
 };
 
-async function initGame(ids, roomId, puzzle, savedPieces, canvas, setImage, setLoadState) {
+async function initGame(ids, roomId, puzzle, savedPieces, canvas, setImage, setLoadState, updatePeers) {
 	let mp = null;
 	if (roomId != null) {
 		if (ids != null) {
-			mp = new Host(roomId);
+			mp = new Host(roomId, updatePeers);
 		} else {
 			setLoadState(loadStates.waiting);
-			mp = new Client(roomId);
+			mp = new Client(roomId, updatePeers);
 			[puzzle, savedPieces] = await mp.waitForData();
 			setImage(puzzle.image);
 		}
@@ -41,12 +41,14 @@ async function initGame(ids, roomId, puzzle, savedPieces, canvas, setImage, setL
 	return game;
 }
 
-function useGame(ids, puzzle, savedPieces, roomId) {
+function useGame(ids, puzzle, savedPieces, roomId, updatePeers) {
 	const [loadState, setLoadState] = useState(loadStates.none);
 	const [image, setImage] = useState(puzzle != null ? puzzle.image : null);
 	const canvas = useRef();
 	useAsyncEffect(async () => {
-		const game = await initGame(ids, roomId, puzzle, savedPieces, canvas.current, setImage, setLoadState);
+		const game = await initGame(
+			ids, roomId, puzzle, savedPieces, canvas.current, setImage, setLoadState, updatePeers,
+		);
 
 		canvas.current.addEventListener("wheel", (event) => {
 			event.preventDefault();
@@ -70,8 +72,8 @@ function useGame(ids, puzzle, savedPieces, roomId) {
 	return [canvas, loadState, image];
 }
 
-export function Game({ids, puzzle, savedPieces, roomId}) {
-	const [canvas, loadState, image] = useGame(ids, puzzle, savedPieces, roomId);
+export function Game({ids, puzzle, savedPieces, roomId, updatePeers}) {
+	const [canvas, loadState, image] = useGame(ids, puzzle, savedPieces, roomId, updatePeers);
 	const [isPreviewing, setIsPreviewing] = useState(false);
 
 	return (

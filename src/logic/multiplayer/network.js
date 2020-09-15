@@ -24,6 +24,10 @@ function roundColor(color) {
 	};
 }
 
+function compareColors(a, b) {
+	return a.r === b.r && a.g === b.g && a.b === b.b;
+}
+
 class PeerSocket {
 	constructor(baseUrl, roomId, isHost) {
 		this.closed = false;
@@ -83,6 +87,10 @@ class PeerSocket {
 
 		if (this.socket.readyState === 1) {
 			this.socket.send(JSON.stringify(message));
+		} else {
+			this.socket.addEventListener("open", () => {
+				this.socket.send(JSON.stringify(message));
+			});
 		}
 	}
 	close() {
@@ -93,11 +101,12 @@ class PeerSocket {
 
 class Node {
 	constructor(roomKey, isHost) {
-		const name = `jigsaw-${roomKey}`;
+		const roomName = `jigsaw-${roomKey}`;
 		this.shouldSend = true;
-		this.peerSocket = new PeerSocket(wsBaseUrl, name, isHost);
+		this.peerSocket = new PeerSocket(wsBaseUrl, roomName, isHost);
 		this.selfId = -1;
-		this.peers = {[this.selfId]: {x: 0, y: 0, c: roundColor(loadSettings().mpColor)}};
+		const {name, mpColor} = loadSettings();
+		this.peers = {[this.selfId]: {x: 0, y: 0, n: name, c: roundColor(mpColor)}};
 		this.peerSocket.onidchange = (newId) => {
 			this.peers[newId] = this.peers[this.selfId];
 			delete this.peers[this.selfId];
@@ -108,8 +117,10 @@ class Node {
 
 		this.onSettingsChange = (settings) => {
 			this.shouldSend = true;
+			this.peers[this.selfId].n = settings.name;
 			this.peers[this.selfId].c = roundColor(settings.mpColor);
 		};
+
 		addSettingsListener(this.onSettingsChange);
 	}
 	setup(game) {
@@ -120,7 +131,12 @@ class Node {
 	getCursors() {
 		return Object.entries(this.peers).filter(
 			([id]) => Number.parseInt(id, 10) !== this.selfId,
-		).map(([, peer]) => ({x: peer.x, y: peer.y, color: peer.c}));
+		).map(([id, peer]) => ({id, x: peer.x, y: peer.y, color: peer.c}));
+	}
+	getPeers() {
+		return Object.entries(this.peers).filter(
+			([id]) => Number.parseInt(id, 10) !== this.selfId,
+		).map(([id, peer]) => ({id, name: peer.n, color: peer.c}));
 	}
 	close() {
 		clearInterval(this.interval);
@@ -130,13 +146,14 @@ class Node {
 }
 
 export class Host extends Node {
-	constructor(roomKey) {
+	constructor(roomKey, updatePeers) {
 		super(roomKey, true);
 		this.nextId = 0;
+		this.updatePeers = updatePeers;
 
 		// temporarily manage peers, until the game actually starts
 		this.peerSocket.onnewpeer = (peerId) => {
-			this.peers[peerId] = {x: 0, y: 0};
+			this.peers[peerId] = {x: 0, y: 0, n: "puzzler", c: {r: 255, g: 255, b: 255}};
 		};
 		this.peerSocket.onlostpeer = (peerId) => {
 			delete this.peers[peerId];
@@ -155,7 +172,7 @@ export class Host extends Node {
 		}
 
 		this.peerSocket.onnewpeer = (peerId) => {
-			this.peers[peerId] = {x: 0, y: 0, c: {r: 255, g: 255, b: 255}};
+			this.peers[peerId] = {x: 0, y: 0, n: "puzzler", c: {r: 255, g: 255, b: 255}};
 			this.peerSocket.send({
 				h: puzzle.horizontal,
 				v: puzzle.vertical,
@@ -177,14 +194,21 @@ export class Host extends Node {
 		super.setup(game);
 	}
 	handleMessage(peerId, message) {
+		let shouldUpdatePeers = false;
 		const peer = this.peers[peerId];
 		if (message.x != null && message.y != null) {
 			peer.x = message.x;
 			peer.y = message.y;
 		}
 
-		if (message.c != null) {
+		if (message.c != null && !compareColors(peer.c, message.c)) {
+			shouldUpdatePeers = true;
 			peer.c = message.c;
+		}
+
+		if (message.n != null && peer.n !== message.n) {
+			shouldUpdatePeers = true;
+			peer.n = message.n;
 		}
 
 		if (message.piece != null) {
@@ -203,6 +227,10 @@ export class Host extends Node {
 			const piece = updatePiece(this.game, message.drop);
 			this.game.placePieces(piece, false);
 			this.game.save();
+		}
+
+		if (shouldUpdatePeers) {
+			this.updatePeers(this.getPeers());
 		}
 	}
 	handlePointer(pos, piece) {
@@ -258,12 +286,16 @@ export class Host extends Node {
 }
 
 export class Client extends Node {
-	constructor(roomKey) {
+	constructor(roomKey, updatePeers) {
 		super(roomKey, false);
+		this.updatePeers = updatePeers;
 		this.ignoreGroupId = -1;
 		this.ignoreTimeout = null;
+
+		this.sendUpdate();
 	}
 	handleMessage(_, message) {
+		let shouldUpdatePeers = false;
 		if (message.h != null) {
 			this.initData = message;
 			if (this.initResolve != null) {
@@ -274,6 +306,35 @@ export class Client extends Node {
 		}
 
 		if (this.game == null) {
+			// just keep track of peers
+			const peersToDelete = new Set(Object.keys(this.peers).map((i) => Number.parseInt(i, 10)));
+			peersToDelete.delete(this.selfId);
+			for (const [x, peer] of Object.entries(message.peers)) {
+				const peerId = Number.parseInt(x, 10);
+				if (peerId === this.selfId) {
+					continue;
+				}
+
+				const existingPeer = this.peers[peerId];
+				if (existingPeer != null) {
+					if (!compareColors(existingPeer.c, peer.c) || existingPeer.n !== peer.n) {
+						shouldUpdatePeers = true;
+					}
+				} else {
+					shouldUpdatePeers = true;
+				}
+
+				peersToDelete.delete(peerId);
+				this.peers[peerId] = {x: peer.x, y: peer.y, n: peer.n, c: peer.c};
+			}
+			for (const peerId of peersToDelete) {
+				shouldUpdatePeers = true;
+				delete this.peers[peerId];
+			}
+			if (shouldUpdatePeers) {
+				this.updatePeers(this.getPeers());
+			}
+
 			return;
 		}
 
@@ -299,12 +360,19 @@ export class Client extends Node {
 				} else if (existingPeer.piece != null && peer.piece == null) {
 					this.game.placePieces(this.game.pieces[existingPeer.piece.id], false);
 				}
+
+				if (!compareColors(existingPeer.c, peer.c) || existingPeer.n !== peer.n) {
+					shouldUpdatePeers = true;
+				}
+			} else {
+				shouldUpdatePeers = true;
 			}
 
 			peersToDelete.delete(peerId);
 			this.peers[peerId] = peer;
 		}
 		for (const peerId of peersToDelete) {
+			shouldUpdatePeers = true;
 			const existingPeer = this.peers[peerId];
 			if (this.peers[peerId].piece != null) {
 				this.game.placePieces(this.game.pieces[existingPeer.piece.id], false);
@@ -327,6 +395,10 @@ export class Client extends Node {
 					this.game.bvh.insert(ours);
 				}
 			}
+		}
+
+		if (shouldUpdatePeers) {
+			this.updatePeers(this.getPeers());
 		}
 	}
 	handlePointer(pos, piece) {

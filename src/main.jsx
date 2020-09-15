@@ -56,6 +56,11 @@ function useCustomHistory() {
 		toggle((t) => !t);
 	};
 
+	const replaceState = (state) => {
+		stack[stack.length - 1] = state;
+		toggle((t) => !t);
+	};
+
 	const goHome = () => {
 		if (stack.length > 1) {
 			stack.splice(1, Infinity);
@@ -64,11 +69,11 @@ function useCustomHistory() {
 		}
 	};
 
-	return [stack[stack.length - 1], pushState, goHome];
+	return [stack[stack.length - 1], pushState, replaceState, goHome];
 }
 
 function App() {
-	const [state, pushState, goHome] = useCustomHistory();
+	const [state, pushState, replaceState, goHome] = useCustomHistory();
 
 	const startGame = (gameData) => {
 		pushState({...state, gameData, page: "game"});
@@ -91,10 +96,13 @@ function App() {
 	const joinGame = (roomId) => {
 		pushState({...state, roomId, gameData: {}, page: "game"});
 	};
+	const updatePeers = (peers) => {
+		replaceState({...state, peers});
+	};
 
 	return (
 		<div className={styles.app}>
-			<Header goHome={goHome} roomId={state.roomId} />
+			<Header goHome={goHome} roomId={state.roomId} peers={state.peers} />
 			{state.page === "home" ? (
 				<SaveGamePicker
 					startGame={startGame}
@@ -107,7 +115,7 @@ function App() {
 			) : state.page === "puzzle" ? (
 				<PuzzlePicker gameId={state.gameId} image={state.image} startGame={startGame} />
 			) : state.page === "game" ? (
-				<Game {...state.gameData} roomId={state.roomId} />
+				<Game {...state.gameData} roomId={state.roomId} updatePeers={updatePeers} />
 			) : state.page === "multiplayer" ? (
 				<MultiplayerMenu
 					type={state.type}

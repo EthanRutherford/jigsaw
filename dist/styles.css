@@ -260,9 +260,52 @@
 	height: 100%;
 }
 
+.header__title--3Npr7 {
+	position: relative;
+	display: flex;
+    align-items: center;
+    height: 100%;
+}
+
 .header__home-link--sAY0g {
 	color: var(--carbon);
 	text-decoration: none;
+}
+
+.header__room--1SBUo {
+	margin-left: 10px;
+}
+
+.header__players--2VYJV {
+	position: absolute;
+	left: 0;
+	top: 100%;
+	box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, .2);
+	padding: 10px;
+	width: 200px;
+	max-height: 50vh;
+	background-color: white;
+	pointer-events: none;
+	opacity: 0;
+	z-index: 1;
+	transition: opacity .2s;
+	overflow-y: auto;
+}
+.header__title--3Npr7:hover .header__players--2VYJV, .header__players--2VYJV:hover {
+	pointer-events: all;
+	opacity: 1;
+}
+
+.header__player--3sdGV {
+	display: flex;
+	align-items: center;
+}
+.header__player-color--2DwHW {
+	margin-right: 10px;
+	border: 2px solid var(--carbon);
+	border-radius: 50%;
+	width: 16px;
+	height: 16px;
 }
 
 .header__settings-button--3qeUT {

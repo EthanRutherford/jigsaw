@@ -14,9 +14,52 @@
 	height: 100%;
 }
 
+.title {
+	position: relative;
+	display: flex;
+    align-items: center;
+    height: 100%;
+}
+
 .home-link {
 	color: var(--carbon);
 	text-decoration: none;
+}
+
+.room {
+	margin-left: 10px;
+}
+
+.players {
+	position: absolute;
+	left: 0;
+	top: 100%;
+	box-shadow: 2px 2px 2px 2px rgba(0, 0, 0, .2);
+	padding: 10px;
+	width: 200px;
+	max-height: 50vh;
+	background-color: white;
+	pointer-events: none;
+	opacity: 0;
+	z-index: 1;
+	transition: opacity .2s;
+	overflow-y: auto;
+}
+.title:hover .players, .players:hover {
+	pointer-events: all;
+	opacity: 1;
+}
+
+.player {
+	display: flex;
+	align-items: center;
+}
+.player-color {
+	margin-right: 10px;
+	border: 2px solid var(--carbon);
+	border-radius: 50%;
+	width: 16px;
+	height: 16px;
 }
 
 .settings-button {
