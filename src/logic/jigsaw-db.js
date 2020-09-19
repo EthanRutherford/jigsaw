@@ -184,7 +184,7 @@ export function imageToDataUrl(image) {
 	canvas.height = image.height;
 	const context = canvas.getContext("2d");
 	context.drawImage(image, 0, 0);
-	return canvas.toDataURL();
+	return canvas.toDataURL("image/webp", .9);
 }
 export function blobToImage(blob) {
 	return new Promise((resolve) => {
