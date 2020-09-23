@@ -165,6 +165,7 @@ export class PuzzleGame {
 
 		let snapToPiece = rootPiece;
 		for (const piece of rootPiece.group.pieces) {
+			piece.grabbed = false;
 			bvh.remove(piece);
 			const hits = bvh.insert(piece);
 
@@ -218,7 +219,6 @@ export class PuzzleGame {
 		}
 
 		for (const piece of rootPiece.group.pieces) {
-			piece.grabbed = false;
 			piece.zIndex = zIndex + 2;
 		}
 
