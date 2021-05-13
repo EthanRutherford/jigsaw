@@ -87,7 +87,6 @@ export function Game({ids, puzzle, savedPieces, roomId, updatePeers}) {
 	const [canvas, loadState, image, color] = useGame(ids, puzzle, savedPieces, roomId, updatePeers);
 	const [isPreviewing, setIsPreviewing] = useState(false);
 
-	console.log(svgCursor(color));
 	return (
 		<div className={styles.container} style={{cursor: svgCursor(color)}}>
 			<canvas
