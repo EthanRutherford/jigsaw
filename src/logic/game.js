@@ -211,7 +211,8 @@ export class PuzzleGame {
 				if (
 					!piece.group.pieces.has(hit) &&
 					!piece.grabbed &&
-					hit.zIndex > zIndex
+					hit.zIndex > zIndex &&
+					hit.zIndex < 9999
 				) {
 					zIndex = hit.zIndex;
 				}
