@@ -76,7 +76,7 @@ function useGame(ids, puzzle, savedPieces, roomId, updatePeers) {
 
 function svgCursor(color) {
 	const colorString = `rgb(${Math.round(color.r)}, ${Math.round(color.g)}, ${Math.round(color.b)})`;
-	const head = `<svg width="20px" height="20px" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">`;
+	const head = `<svg width="24px" height="24px" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">`;
 	const path = `<path d="M0 0L10 5L5 10Z" fill="${colorString}" />`;
 	const tail = `</svg>`;
 
