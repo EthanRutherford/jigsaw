@@ -44,6 +44,7 @@ async function initGame(ids, roomId, puzzle, savedPieces, canvas, setImage, setL
 function useGame(ids, puzzle, savedPieces, roomId, updatePeers) {
 	const [loadState, setLoadState] = useState(loadStates.none);
 	const [image, setImage] = useState(puzzle != null ? puzzle.image : null);
+	const [color, setColor] = useState(loadSettings().mpColor);
 	const canvas = useRef();
 	useAsyncEffect(async () => {
 		const game = await initGame(
@@ -58,6 +59,7 @@ function useGame(ids, puzzle, savedPieces, roomId, updatePeers) {
 		game.animLoop();
 
 		const listenForColorChanges = (settings) => {
+			setColor(settings.mpColor);
 			game.setBgColor(settings.bgColor);
 		};
 
@@ -69,15 +71,25 @@ function useGame(ids, puzzle, savedPieces, roomId, updatePeers) {
 		};
 	}, []);
 
-	return [canvas, loadState, image];
+	return [canvas, loadState, image, color];
+}
+
+function svgCursor(color) {
+	const colorString = `rgb(${Math.round(color.r)}, ${Math.round(color.g)}, ${Math.round(color.b)})`;
+	const head = `<svg width="24px" height="24px" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">`;
+	const path = `<path d="M0 0L10 5L5 10Z" fill="${colorString}" />`;
+	const tail = `</svg>`;
+
+	return `url('data:image/svg+xml;utf8,${head + path + tail}') 0 0, auto`;
 }
 
 export function Game({ids, puzzle, savedPieces, roomId, updatePeers}) {
-	const [canvas, loadState, image] = useGame(ids, puzzle, savedPieces, roomId, updatePeers);
+	const [canvas, loadState, image, color] = useGame(ids, puzzle, savedPieces, roomId, updatePeers);
 	const [isPreviewing, setIsPreviewing] = useState(false);
 
+	console.log(svgCursor(color));
 	return (
-		<div className={styles.container}>
+		<div className={styles.container} style={{cursor: svgCursor(color)}}>
 			<canvas
 				className={styles.viewport}
 				ref={canvas}
