@@ -258,18 +258,22 @@ export class Host extends Node {
 		delete this.peers[this.selfId].piece;
 	}
 	sendUpdate() {
-		// to keep message sizes small and quick, we only send 20 puzzle pieces at a time.
+		// to keep message sizes small and quick, we only send ~20 puzzle pieces at a time.
 		// we always send any pieces currently being dragged by a player, and then round
 		// robin remaining pieces to fill the buffer. This ensures that message sizes
 		// stay relatively small, while still ensuring every piece is synced periodically.
 		const pieceIds = new Set();
 		for (const peer of Object.values(this.peers)) {
 			if (peer.piece != null) {
-				pieceIds.add(peer.piece.id);
+				const rootPiece = this.game.pieces[peer.piece.id];
+				for (const piece of rootPiece.group.pieces) {
+					pieceIds.add(piece.id);
+				}
 			}
 		}
 
-		while (pieceIds.size < 20) {
+		let min = 5;
+		while (min-- > 0 || pieceIds.size < 20) {
 			pieceIds.add(this.nextId++);
 			if (this.nextId === this.game.pieces.length) {
 				this.nextId = 0;
